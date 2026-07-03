@@ -1,0 +1,84 @@
+{
+  "blockName": "Bloc été — force/masse prioritaire",
+  "blockValidUntil": "2026-08-31",
+  "weekNumber": 1,
+  "weekOfBlock": "1/8",
+  "priority": "Force / masse",
+  "runningRule": "Course 100% easy. Rien d'intense sur les jambes mar/ven.",
+  "days": [
+    {
+      "day": "Lundi",
+      "type": "course",
+      "title": "Course easy",
+      "detail": "45–60 min · >6:00/km · allure conversation",
+      "done": false
+    },
+    {
+      "day": "Mardi",
+      "type": "salle",
+      "title": "Lower — force",
+      "exercises": [
+        { "name": "Back Squat", "sets": "4×5", "target": "RPE 8" },
+        { "name": "Romanian Deadlift", "sets": "3×8", "target": "RPE 7" },
+        { "name": "Presse / Fentes", "sets": "3×10", "target": "RPE 8" },
+        { "name": "Leg curl", "sets": "3×12", "target": "RPE 9" },
+        { "name": "Mollets debout", "sets": "4×12", "target": "RPE 9" }
+      ],
+      "note": "Course : repos, ou easy 30 min APRÈS la salle.",
+      "done": false
+    },
+    {
+      "day": "Mercredi",
+      "type": "course",
+      "title": "Course easy vallonnée",
+      "detail": "45–60 min · terrain D+ · allure conversation",
+      "done": false
+    },
+    {
+      "day": "Jeudi",
+      "type": "salle",
+      "title": "Upper — force",
+      "exercises": [
+        { "name": "Bench Press", "sets": "4×5", "target": "RPE 8" },
+        { "name": "Rowing barre", "sets": "4×6", "target": "RPE 8" },
+        { "name": "Overhead Press", "sets": "3×6", "target": "RPE 8" },
+        { "name": "Tractions / lat pulldown", "sets": "3×8", "target": "RPE 9" },
+        { "name": "Curl biceps", "sets": "3×12", "target": "RPE 9" },
+        { "name": "Extension triceps", "sets": "3×12", "target": "RPE 9" }
+      ],
+      "note": "Course : easy 30–45 min OK (jambes dispo).",
+      "done": false
+    },
+    {
+      "day": "Vendredi",
+      "type": "salle",
+      "title": "Full body — priorité deadlift",
+      "exercises": [
+        { "name": "Deadlift", "sets": "4×4", "target": "RPE 7 · priorité" },
+        { "name": "Incline Bench", "sets": "3×8", "target": "RPE 8" },
+        { "name": "Rowing haltère", "sets": "3×10", "target": "RPE 8" },
+        { "name": "Élévations latérales", "sets": "3×15", "target": "RPE 9" },
+        { "name": "Gainage", "sets": "3×45s", "target": "" }
+      ],
+      "note": "Course : repos total (jambes fraîches pour le deadlift).",
+      "done": false
+    },
+    {
+      "day": "Samedi",
+      "type": "course",
+      "title": "Longue sortie",
+      "detail": "75–90 min · montagne/trail · easy strict",
+      "done": false
+    },
+    {
+      "day": "Dimanche",
+      "type": "course",
+      "title": "Récup active",
+      "detail": "45 min easy ou rando",
+      "done": false
+    }
+  ],
+  "nutrition": "Surplus +350–450 kcal/j · Protéines 160 g/j · Glucides post-salle + veille de la longue · Cible +0,2–0,3 kg/sem",
+  "progression": "+2,5 kg/sem squat·bench·OHP·incline (RPE ≤8) · +5 kg/sem deadlift (RPE ≤7)",
+  "vigilance": "Pas de fractionné/seuil ce bloc. Ven→Sam : jambes cuites → longue à dimanche. Easy qui pique = trop rapide."
+}

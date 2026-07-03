@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# Icônes PNG générées (recréées par `npm run icons`)
+public/pwa-192.png
+public/pwa-512.png
+public/maskable-512.png
+public/apple-touch-icon.png
+
+# Fichiers PWA générés
+dev-dist

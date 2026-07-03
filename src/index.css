@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    /* Tokens de marque exposés pour les styles inline (bande hebdo, glows). */
+    --ink: #0a0a0b;
+    --run: #fc4c02; /* course */
+    --gym: #b9ff3c; /* salle */
+
+    /* Courbes de décélération exponentielle — pas de bounce. */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink text-white font-body antialiased;
+    /* Halo lumineux discret en haut, ambiance "night run". */
+    background-image:
+      radial-gradient(120% 60% at 50% -10%, rgba(252, 76, 2, 0.12), transparent 60%),
+      radial-gradient(90% 50% at 90% 5%, rgba(185, 255, 60, 0.06), transparent 55%);
+    background-attachment: fixed;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe areas iOS (notch / home indicator) */
+  #root {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply rounded-3xl border border-white/10 bg-white/[0.05] shadow-glass backdrop-blur-xl;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em];
+  }
+
+  /* Anneau de focus clavier cohérent, jamais supprimé sans remplacement. */
+  .focus-ring {
+    @apply outline-none;
+  }
+  .focus-ring:focus-visible {
+    @apply ring-2 ring-white/70 ring-offset-2;
+    --tw-ring-offset-color: #0a0a0b;
+  }
+}
+
+/* Accessibilité mouvement : coupe transitions/animations et le smooth-scroll. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar discrète */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

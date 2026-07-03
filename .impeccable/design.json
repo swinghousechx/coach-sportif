@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-03T00:00:00.000Z",
+  "title": "Design System: Coach — programme de la semaine",
+  "extensions": {
+    "colorMeta": {
+      "run-orange": {
+        "role": "primary",
+        "displayName": "Dossard Orange",
+        "canonical": "#FC4C02",
+        "tonalRamp": ["#2B0E03", "#521A05", "#7A2708", "#A3350B", "#CC420E", "#FC4C02", "#FF7A45", "#FFB394"]
+      },
+      "gym-lime": {
+        "role": "secondary",
+        "displayName": "Lime Électrique",
+        "canonical": "#B9FF3C",
+        "tonalRamp": ["#1E2907", "#31440C", "#496413", "#63871A", "#7FAE22", "#9BD52C", "#B9FF3C", "#D6FF87"]
+      },
+      "success-emerald": {
+        "role": "tertiary",
+        "displayName": "Emerald Succès",
+        "canonical": "#34D399",
+        "tonalRamp": ["#06251A", "#0A3D2B", "#0F5940", "#137A57", "#189B6F", "#22C088", "#34D399", "#7FE7C4"]
+      },
+      "warning-amber": {
+        "role": "tertiary",
+        "displayName": "Ambre Vigilance",
+        "canonical": "#FBBF24",
+        "tonalRamp": ["#2B1E02", "#4A3405", "#6B4B08", "#8F660C", "#B98511", "#DDA419", "#FBBF24", "#FDD971"]
+      },
+      "error-rose": {
+        "role": "tertiary",
+        "displayName": "Rose Erreur",
+        "canonical": "#FCA5A5",
+        "tonalRamp": ["#3B0E0E", "#5C1717", "#7E2323", "#A23333", "#C55A5A", "#E38080", "#FCA5A5", "#FFC9C9"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink Night-Run",
+        "canonical": "#0A0A0B",
+        "tonalRamp": ["#0A0A0B", "#1A1A1C", "#2C2C2F", "#454548", "#6E6E72", "#9A9A9E", "#C9C9CC", "#FFFFFF"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Nom du bloc dans le header. Oswald bold condensé." },
+      "headline": { "displayName": "Headline", "purpose": "Titre de chaque séance." },
+      "data": { "displayName": "Data", "purpose": "Chiffres séries×reps, tabulaires, en couleur d'accent." },
+      "body": { "displayName": "Body", "purpose": "Détails de séance, notes, contenu des sections." },
+      "label": { "displayName": "Label", "purpose": "Badges de type et labels de jour. Seul usage MAJUSCULES." }
+    },
+    "shadows": [
+      { "name": "glass", "value": "0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)", "purpose": "Ombre de base de toute carte de verre ; l'inset simule un bord biseauté qui capte la lumière." },
+      { "name": "today-glow-run", "value": "0 8px 40px -12px rgba(252,76,2,0.35)", "purpose": "Halo orange sous la carte du jour courant (course)." },
+      { "name": "today-glow-gym", "value": "0 8px 40px -12px rgba(185,255,60,0.28)", "purpose": "Halo lime sous la carte du jour courant (salle)." }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Décélération par défaut : coche, remplissage de la bande, expand/collapse." },
+      { "name": "ease-out-quint", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Variante légèrement plus vive." },
+      { "name": "dur-feedback", "value": "150ms", "purpose": "Retour instantané : tap, changement de couleur." },
+      { "name": "dur-state", "value": "300ms", "purpose": "Changement d'état : grise, ouverture, remplissage." },
+      { "name": "dur-check-draw", "value": "320ms", "purpose": "Tracé de la coche à la validation." }
+    ],
+    "breakpoints": [
+      { "name": "container", "value": "28rem", "purpose": "Largeur max de la colonne unique (mobile-first)." },
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "card-glass",
+      "description": "Surface de base : une carte de verre sur le near-black.",
+      "html": "<div class=\"ds-card\"><span class=\"ds-card__accent\"></span><div class=\"ds-card__body\"><span class=\"ds-badge ds-badge--salle\">Salle</span> <span class=\"ds-card__day\">Mardi</span><h2 class=\"ds-card__title\">Lower — force</h2></div></div>",
+      "css": ".ds-card { position: relative; border-radius: 24px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06); backdrop-filter: blur(20px); padding: 16px 16px 16px 20px; color: #fff; } .ds-card__accent { position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px; border-radius: 9999px; background: #B9FF3C; } .ds-card__day { font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); margin-left: 8px; } .ds-card__title { font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; margin: 6px 0 0; }"
+    },
+    {
+      "name": "Done Toggle (signature)",
+      "kind": "custom",
+      "refersTo": "toggle-done",
+      "description": "Coche circulaire de validation d'une séance. Non fait = fantôme ; fait = emerald plein. Tactile & confiant.",
+      "html": "<button class=\"ds-toggle ds-toggle--done\" aria-pressed=\"true\" aria-label=\"Marquer comme non fait\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\"><path d=\"M5 13l4 4L19 7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-toggle { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 9999px; border: 2px solid rgba(255,255,255,0.30); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.55); cursor: pointer; transition: transform 0.15s cubic-bezier(0.16,1,0.3,1), background 0.2s, border-color 0.2s, color 0.2s; } .ds-toggle:hover { transform: scale(1.06); border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.8); } .ds-toggle:active { transform: scale(0.85); } .ds-toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px #0A0A0B, 0 0 0 4px rgba(255,255,255,0.7); } .ds-toggle--done { border-color: #34D399; background: #34D399; color: #0A0A0B; }"
+    },
+    {
+      "name": "Type Badge",
+      "kind": "chip",
+      "refersTo": "badge-course",
+      "description": "Pilule de type de séance. Course = orange, Salle = lime. Seul usage MAJUSCULES.",
+      "html": "<span class=\"ds-badge ds-badge--course\">Course</span> <span class=\"ds-badge ds-badge--salle\">Salle</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 4px 10px; font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; } .ds-badge--course { background: rgba(252,76,2,0.15); color: #FC4C02; } .ds-badge--salle { background: rgba(185,255,60,0.15); color: #B9FF3C; }"
+    },
+    {
+      "name": "Week Strip Segment",
+      "kind": "custom",
+      "refersTo": "week-strip",
+      "description": "Un jour de la bande hebdo. La barre se remplit d'un balayage (scaleX) quand la séance est faite ; le jour courant est cerclé.",
+      "html": "<div class=\"ds-strip\"><button class=\"ds-strip__seg ds-strip__seg--today\"><span class=\"ds-strip__track\"><span class=\"ds-strip__fill ds-strip__fill--done\"></span></span><span class=\"ds-strip__label\">Ven</span></button><button class=\"ds-strip__seg\"><span class=\"ds-strip__track\"><span class=\"ds-strip__fill\"></span></span><span class=\"ds-strip__label ds-strip__label--muted\">Sam</span></button></div>",
+      "css": ".ds-strip { display: flex; align-items: flex-end; gap: 6px; } .ds-strip__seg { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 6px; padding: 4px 0; background: none; border: none; cursor: pointer; border-radius: 8px; transition: transform 0.15s cubic-bezier(0.16,1,0.3,1); } .ds-strip__seg:active { transform: scale(0.9); } .ds-strip__track { position: relative; width: 100%; height: 6px; border-radius: 9999px; background: rgba(255,255,255,0.12); overflow: hidden; } .ds-strip__seg--today .ds-strip__track { box-shadow: 0 0 0 1.5px #B9FF3C, 0 0 10px -2px #B9FF3C; } .ds-strip__fill { position: absolute; inset: 0; border-radius: 9999px; background: #B9FF3C; transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); } .ds-strip__fill--done { transform: scaleX(1); } .ds-strip__label { font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #B9FF3C; } .ds-strip__label--muted { color: rgba(255,255,255,0.45); }"
+    },
+    {
+      "name": "Update Button",
+      "kind": "button",
+      "refersTo": "button-update",
+      "description": "Bouton de verre pleine largeur pour importer un nouveau program.json.",
+      "html": "<button class=\"ds-btn-update\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 16V4m0 0 4 4m-4-4-4 4\"/><path d=\"M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2\"/></svg> Mettre à jour le programme</button>",
+      "css": ".ds-btn-update { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06); backdrop-filter: blur(20px); padding: 14px 16px; font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.85); cursor: pointer; transition: background 0.2s, transform 0.2s; } .ds-btn-update:hover { background: rgba(255,255,255,0.08); } .ds-btn-update:active { transform: scale(0.98); } .ds-btn-update:focus-visible { outline: none; box-shadow: 0 0 0 2px #0A0A0B, 0 0 0 4px rgba(255,255,255,0.7); }"
+    },
+    {
+      "name": "Collapsible Section",
+      "kind": "custom",
+      "refersTo": "collapsible",
+      "description": "Section repliable (Nutrition / Progression / Vigilance) via grid-template-rows 0fr→1fr. Icône colorée par rôle.",
+      "html": "<div class=\"ds-collapsible\"><button class=\"ds-collapsible__head\" aria-expanded=\"true\"><span class=\"ds-collapsible__title\"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"#FC4C02\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3s5 4 5 9a5 5 0 0 1-10 0c0-1.6.7-2.8 1.4-3.6.3 1.3 1.1 1.8 1.6 1.9C10.2 8.7 12 6.5 12 3Z\"/></svg> Nutrition</span><svg class=\"ds-collapsible__chevron\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 9l6 6 6-6\"/></svg></button></div>",
+      "css": ".ds-collapsible { border-radius: 24px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06); overflow: hidden; } .ds-collapsible__head { display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 14px 16px; background: none; border: none; cursor: pointer; transition: background 0.2s; } .ds-collapsible__head:hover { background: rgba(255,255,255,0.04); } .ds-collapsible__title { display: inline-flex; align-items: center; gap: 10px; font-family: Oswald, 'Arial Narrow', sans-serif; font-size: 1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.85); } .ds-collapsible__chevron { color: rgba(255,255,255,0.5); transform: rotate(180deg); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night-Run Dashboard",
+    "overview": "Un tableau de bord d'entraînement qu'on consulte lampe frontale allumée. Fond near-black (#0A0A0B) percé de halos orange/lime discrets, surfaces en verre liquide qui portent la donnée. La couleur code un fait, jamais une humeur : orange course, lime salle, emerald fait. Le système SERT la tâche (afficher le programme du jour) sans se mettre en scène ; le mouvement confirme l'action mais ne chorégraphie jamais le chargement. Typo condensée bold (Oswald) sur titres et chiffres, corps Inter d'une lisibilité clinique.",
+    "keyCharacteristics": [
+      "Fond near-black + surfaces liquid glass ; profondeur par la lumière, pas l'ombre portée.",
+      "Deux accents-signal : orange course, lime salle. Vert = état fait.",
+      "Oswald bold pour titres/chiffres ; Inter pour le corps.",
+      "Contraste fort partout (≥ 4.5:1) — lisible plein soleil comme à la salle.",
+      "Mobile-first strict, une colonne ~28rem, safe-areas iOS.",
+      "Mouvement = feedback d'état ; prefers-reduced-motion respecté."
+    ],
+    "rules": [
+      { "name": "The Signal Rule", "body": "La couleur code un fait, jamais une humeur. Orange course, lime salle, emerald fait, ambre attention, rose erreur. Un même sens porte toujours la même couleur.", "section": "colors" },
+      { "name": "The Sunlight Rule", "body": "Tout texte utile tient ≥ 4.5:1 sur le near-black. Le gris pâle « élégant » est banni : il rend l'app illisible dehors, exactement le contexte d'usage.", "section": "colors" },
+      { "name": "The Bib-Number Rule", "body": "Les chiffres qui comptent (séries×reps, X/7, RPE prioritaire) sont en Oswald bold tabulaire, souvent en couleur d'accent. Lisibles barre en main.", "section": "typography" },
+      { "name": "The Sentence-Case Rule", "body": "Tout est en casse de phrase, sauf les badges de type et les labels de jour.", "section": "typography" },
+      { "name": "The No-Drop-Shadow Rule", "body": "Pas d'ombre noire opaque pour détacher une carte. La séparation vient du flou de verre et du bord blanc translucide.", "section": "elevation" },
+      { "name": "The Glow-Is-State Rule", "body": "Le halo coloré n'apparaît que sous la carte du jour courant. Un glow qui n'est pas un signal d'état est proscrit.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do coder le sens par la couleur : orange course, lime salle, emerald fait, ambre attention, rose erreur — et rien d'autre.",
+      "Do garder tout texte utile ≥ 4.5:1 sur le near-black ; plancher du muted à 55 %.",
+      "Do utiliser Oswald bold tabulaire pour les chiffres qui comptent.",
+      "Do faire de la profondeur avec le flou de verre + bord blanc translucide.",
+      "Do réserver le mouvement au feedback d'état et fournir une alternative prefers-reduced-motion.",
+      "Do signaler l'état par trois canaux redondants (opacité + barré + coche), jamais la couleur seule."
+    ],
+    "donts": [
+      "Don't virer au bleu-corporate des apps fitness freemium ni au gris-sur-blanc des dashboards SaaS.",
+      "Don't poser de dégradé violet-bleu, de background-clip: text en dégradé, ni de gris pâle « élégant ».",
+      "Don't empiler des cartes identiques à l'infini ni des emoji dépareillés.",
+      "Don't utiliser un border-left/right > 1px comme bande d'accent colorée.",
+      "Don't chorégraphier le chargement de page ; pas de fade-on-scroll générique par section.",
+      "Don't ajouter un glow ou une ombre qui ne code pas un état.",
+      "Don't passer en ALL CAPS ailleurs que sur les badges de type et les labels de jour."
+    ]
+  }
+}
