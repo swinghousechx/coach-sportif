@@ -5,6 +5,7 @@ import { currentWeekIndex, todayISO } from './lib/week'
 import { loadStoredProgram, saveProgram, loadDoneOverrides, saveDoneOverrides } from './lib/storage'
 import Tabs, { type TabKey } from './components/Tabs'
 import RaceBanner from './components/RaceBanner'
+import Icon from './components/Icon'
 import WeekHeader from './components/WeekHeader'
 import DayCard from './components/DayCard'
 import ProgramOverview from './components/ProgramOverview'
@@ -113,6 +114,17 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="mx-auto min-h-full max-w-md px-4 pb-10 pt-4">
+        <div className="mb-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            aria-label="Rafraîchir l'app"
+            className="focus-ring rounded-full p-2 text-white/45 transition hover:text-white/80 active:scale-90"
+          >
+            <Icon name="refresh" size={18} />
+          </button>
+        </div>
+
         <RaceBanner race={program.raceInfo} raceDate={program.raceDate} />
 
         <Tabs value={tab} onChange={setTab} />

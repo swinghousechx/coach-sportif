@@ -18,6 +18,7 @@ type Name =
   | 'flag'
   | 'moon'
   | 'protein'
+  | 'refresh'
 
 const PATHS: Record<Name, JSX.Element> = {
   // Ligne de rythme cardio — la course / l'effort.
@@ -92,7 +93,14 @@ const PATHS: Record<Name, JSX.Element> = {
   // Repos.
   moon: <path d="M20 14.5A8 8 0 0 1 9.5 4 6.5 6.5 0 1 0 20 14.5Z" />,
   // Protéines — plancher (icône bouclier).
-  protein: <path d="M12 3 5 6v5c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6l-7-3Z" />
+  protein: <path d="M12 3 5 6v5c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6l-7-3Z" />,
+  // Rafraîchir — flèche circulaire.
+  refresh: (
+    <>
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 4v5h-5" />
+    </>
+  )
 }
 
 interface Props extends SVGProps<SVGSVGElement> {
