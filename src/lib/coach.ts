@@ -73,7 +73,8 @@ export async function fetchDebrief(
       context: {
         raceDate: program.raceDate,
         raceInfo: program.raceInfo,
-        week: { weekNumber: week.weekNumber, phase: week.phase, muscuLegsPhase: week.muscuLegsPhase }
+        week: { weekNumber: week.weekNumber, phase: week.phase, muscuLegsPhase: week.muscuLegsPhase },
+        etatDuJour: loadEtat(day.date) ?? undefined
       }
     })
   })
@@ -82,6 +83,35 @@ export async function fetchDebrief(
     throw new Error(detail.error || `erreur ${r.status}`)
   }
   return r.json()
+}
+
+// ---- État du jour (récup subjective + FC repos), par date ----
+
+export interface DailyState {
+  sommeil?: 'bien' | 'moyen' | 'mauvais'
+  fatigue?: number // 1 (frais) → 5 (cuit)
+  hrRest?: number // FC repos (bpm), depuis la Garmin
+}
+
+const ETAT_KEY = 'coach:etat'
+
+export function loadEtat(date: string): DailyState | null {
+  try {
+    const all = JSON.parse(localStorage.getItem(ETAT_KEY) || '{}')
+    return all[date] ?? null
+  } catch {
+    return null
+  }
+}
+
+export function saveEtat(date: string, etat: DailyState): void {
+  try {
+    const all = JSON.parse(localStorage.getItem(ETAT_KEY) || '{}')
+    all[date] = etat
+    localStorage.setItem(ETAT_KEY, JSON.stringify(all))
+  } catch {
+    /* ignore */
+  }
 }
 
 // ---- Persistance locale des débriefs (par date) ----

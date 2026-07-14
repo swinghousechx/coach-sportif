@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import type { Program } from '../types'
 import { buildReco, type Reco } from '../lib/reco'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
+import EtatDuJour from './EtatDuJour'
 import Icon from './Icon'
 
 const STRAVA_LOG = 'https://www.strava.com/athlete/training'
@@ -50,6 +51,9 @@ export default function RecoTab({ program, todayDate }: Props) {
     <div className="flex flex-col gap-4">
       {/* Synchro Strava */}
       <StravaCard />
+
+      {/* État du jour (récup subjective + FC repos → pris en compte par le coach) */}
+      {isCoachEnabled() && <EtatDuJour date={todayDate} />}
 
       {/* Analyse à la demande */}
       {state !== 'done' ? (
