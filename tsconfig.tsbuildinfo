@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/collapsiblesection.tsx","./src/components/daycard.tsx","./src/components/expiredbanner.tsx","./src/components/header.tsx","./src/components/icon.tsx","./src/components/updatebutton.tsx","./src/components/weekstrip.tsx","./src/lib/storage.ts","./src/lib/week.ts"],"version":"5.9.3"}

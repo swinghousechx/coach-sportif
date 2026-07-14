@@ -11,6 +11,13 @@ type Name =
   | 'check'
   | 'chevron'
   | 'inbox'
+  | 'route'
+  | 'mountain'
+  | 'heart'
+  | 'external'
+  | 'flag'
+  | 'moon'
+  | 'protein'
 
 const PATHS: Record<Name, JSX.Element> = {
   // Ligne de rythme cardio — la course / l'effort.
@@ -52,7 +59,40 @@ const PATHS: Record<Name, JSX.Element> = {
       <path d="M22 12h-6l-2 3h-4l-2-3H2" />
       <path d="M5.5 6.5 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-5.5A2 2 0 0 0 16.8 5H7.2a2 2 0 0 0-1.7 1.5Z" />
     </>
-  )
+  ),
+  // Distance de course — jalons sur un tracé.
+  route: (
+    <>
+      <circle cx="6" cy="19" r="2.5" />
+      <circle cx="18" cy="5" r="2.5" />
+      <path d="M8.5 19H14a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h5.5" />
+    </>
+  ),
+  // Dénivelé — sommet.
+  mountain: <path d="M3 20h18L14 6l-3.5 6.5L8 9l-5 11Z" />,
+  // Fréquence cardiaque.
+  heart: (
+    <path d="M12 20.5S3.5 14.6 3.5 8.9A4.4 4.4 0 0 1 12 6.9a4.4 4.4 0 0 1 8.5 2c0 5.7-8.5 11.6-8.5 11.6Z" />
+  ),
+  // Lien externe (Strava).
+  external: (
+    <>
+      <path d="M14 4h6v6" />
+      <path d="M20 4 10 14" />
+      <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </>
+  ),
+  // Drapeau — jour de course.
+  flag: (
+    <>
+      <path d="M5 21V4" />
+      <path d="M5 4h11l-1.5 3.5L16 11H5" />
+    </>
+  ),
+  // Repos.
+  moon: <path d="M20 14.5A8 8 0 0 1 9.5 4 6.5 6.5 0 1 0 20 14.5Z" />,
+  // Protéines — plancher (icône bouclier).
+  protein: <path d="M12 3 5 6v5c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6l-7-3Z" />
 }
 
 interface Props extends SVGProps<SVGSVGElement> {

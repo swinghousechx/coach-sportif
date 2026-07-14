@@ -1,30 +1,90 @@
-export type SessionType = 'course' | 'salle'
+// Modèle du plan marathon trail : une entrée par semaine, chaque jour muscu OU course.
+
+export type DayType =
+  | 'gym'
+  | 'run'
+  | 'long_run'
+  | 'hike'
+  | 'rest_or_easy'
+  | 'gym_and_run'
+  | 'race'
 
 export interface Exercise {
   name: string
-  sets: string
-  target?: string
+  sets: number | string
+  reps: number | string
+  note?: string
+}
+
+/** Bloc course intégré à une journée muscu+course (jeudi). */
+export interface RunDetail {
+  distanceKm?: number | string
+  type?: string
+  description?: string
+  zone?: string
+  elevationM?: number
+}
+
+export interface Nutrition {
+  calories: number | null
+  proteinG: number | null
+  note?: string
+}
+
+/** Résumé d'activité Strava (rempli plus tard si sync backend). */
+export interface StravaSummary {
+  activityId: number
+  distanceKm: number
+  elevationM: number
+  movingTime: string
+  avgHr?: number
+  avgPace?: string
 }
 
 export interface Day {
-  day: string
-  type: SessionType
-  title: string
-  detail?: string
+  date: string // "YYYY-MM-DD"
+  label: string // "Lundi" …
+  type: DayType
+  status?: string // "done" pré-coché depuis le JSON
+  sessionName?: string
+  description?: string
+  phase?: string // phase muscu du jour (progression / maintenance / taper)
   exercises?: Exercise[]
-  note?: string
-  done?: boolean
+  run?: RunDetail // pour type gym_and_run
+  distanceKm?: number | string
+  zone?: string
+  elevationM?: number
+  goalTime?: string // jour de course
+  nutrition?: Nutrition
+  strava?: StravaSummary // rempli si l'activité correspondante est synchronisée
+}
+
+export interface Week {
+  weekNumber: number
+  dateStart: string
+  dateEnd: string
+  phase: string
+  longRunKm: number | string | null
+  elevationLoad?: string
+  muscuLegsPhase?: string
+  days: Day[]
+}
+
+export interface RaceInfo {
+  name: string
+  distanceKm: number
+  elevationM: number
+  goalTime: string
 }
 
 export interface Program {
-  blockName: string
-  blockValidUntil: string // ISO date "YYYY-MM-DD"
-  weekNumber: number
-  weekOfBlock: string
-  priority: string
-  runningRule: string
-  days: Day[]
-  nutrition: string
-  progression: string
-  vigilance: string
+  raceDate: string
+  raceInfo: RaceInfo
+  updatedAt?: string
+  weeks: Week[]
+}
+
+/** Familles d'accent : course (orange) vs muscu (lime). */
+export function isRunType(type: DayType): boolean {
+  return type === 'run' || type === 'long_run' || type === 'hike' || type === 'race'
 }

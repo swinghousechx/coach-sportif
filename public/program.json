@@ -1,84 +1,2329 @@
 {
-  "blockName": "Bloc été — force/masse prioritaire",
-  "blockValidUntil": "2026-08-31",
-  "weekNumber": 1,
-  "weekOfBlock": "1/8",
-  "priority": "Force / masse",
-  "runningRule": "Course 100% easy. Rien d'intense sur les jambes mar/ven.",
-  "days": [
+  "raceDate": "2026-10-11",
+  "raceInfo": {
+    "name": "Marathon trail auto-organisé",
+    "distanceKm": 42,
+    "elevationM": 900,
+    "goalTime": "4:00:00"
+  },
+  "updatedAt": "2026-07-14",
+  "weeks": [
     {
-      "day": "Lundi",
-      "type": "course",
-      "title": "Course easy",
-      "detail": "45–60 min · >6:00/km · allure conversation",
-      "done": false
+      "weekNumber": 1,
+      "dateStart": "2026-07-14",
+      "dateEnd": "2026-07-20",
+      "phase": "Consolidation",
+      "longRunKm": 16,
+      "elevationLoad": "modéré",
+      "muscuLegsPhase": "progression",
+      "days": [
+        {
+          "date": "2026-07-14",
+          "label": "Lundi",
+          "type": "hike",
+          "status": "done",
+          "description": "Balade / hike easy",
+          "distanceKm": 9.3,
+          "nutrition": {
+            "calories": null,
+            "proteinG": 160,
+            "note": "Jour easy, pas de reco spécifique."
+          }
+        },
+        {
+          "date": "2026-07-15",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "+2.5 kg vs dernière séance si RPE ≤8"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-07-16",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-07-17",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "côtes",
+            "description": "Répétitions courtes en montée, marche récup"
+          },
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 165,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-07-18",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "+5 kg si RPE ≤7"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-07-19",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-11",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-07-20",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue vallonné",
+          "distanceKm": 16,
+          "elevationM": 400,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 165,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Mardi",
-      "type": "salle",
-      "title": "Lower — force",
-      "exercises": [
-        { "name": "Back Squat", "sets": "4×5", "target": "RPE 8" },
-        { "name": "Romanian Deadlift", "sets": "3×8", "target": "RPE 7" },
-        { "name": "Presse / Fentes", "sets": "3×10", "target": "RPE 8" },
-        { "name": "Leg curl", "sets": "3×12", "target": "RPE 9" },
-        { "name": "Mollets debout", "sets": "4×12", "target": "RPE 9" }
-      ],
-      "note": "Course : repos, ou easy 30 min APRÈS la salle.",
-      "done": false
+      "weekNumber": 2,
+      "dateStart": "2026-07-21",
+      "dateEnd": "2026-07-27",
+      "phase": "Build",
+      "longRunKm": 19,
+      "elevationLoad": "modéré",
+      "muscuLegsPhase": "progression",
+      "days": [
+        {
+          "date": "2026-07-21",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-07-22",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "+2.5 kg vs dernière séance si RPE ≤8"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-07-23",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-07-24",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "tempo",
+            "description": "Bloc tempo doux Z3 sur terrain roulant"
+          },
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 165,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-07-25",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "+5 kg si RPE ≤7"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-07-26",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-07-27",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue vallonné",
+          "distanceKm": 19,
+          "elevationM": 500,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 165,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Mercredi",
-      "type": "course",
-      "title": "Course easy vallonnée",
-      "detail": "45–60 min · terrain D+ · allure conversation",
-      "done": false
+      "weekNumber": 3,
+      "dateStart": "2026-07-28",
+      "dateEnd": "2026-08-03",
+      "phase": "Build",
+      "longRunKm": 22,
+      "elevationLoad": "modéré+",
+      "muscuLegsPhase": "progression",
+      "days": [
+        {
+          "date": "2026-07-28",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-07-29",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "+2.5 kg vs dernière séance si RPE ≤8"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-07-30",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-07-31",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "côtes",
+            "description": "Répétitions courtes en montée, marche récup"
+          },
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 165,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-08-01",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "+5 kg si RPE ≤7"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-08-02",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 165,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-08-03",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 22,
+          "elevationM": 600,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 165,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Jeudi",
-      "type": "salle",
-      "title": "Upper — force",
-      "exercises": [
-        { "name": "Bench Press", "sets": "4×5", "target": "RPE 8" },
-        { "name": "Rowing barre", "sets": "4×6", "target": "RPE 8" },
-        { "name": "Overhead Press", "sets": "3×6", "target": "RPE 8" },
-        { "name": "Tractions / lat pulldown", "sets": "3×8", "target": "RPE 9" },
-        { "name": "Curl biceps", "sets": "3×12", "target": "RPE 9" },
-        { "name": "Extension triceps", "sets": "3×12", "target": "RPE 9" }
-      ],
-      "note": "Course : easy 30–45 min OK (jambes dispo).",
-      "done": false
+      "weekNumber": 4,
+      "dateStart": "2026-08-04",
+      "dateEnd": "2026-08-10",
+      "phase": "Build",
+      "longRunKm": 24,
+      "elevationLoad": "soutenu",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-08-04",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-05",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 170,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-08-06",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-07",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "tempo",
+            "description": "Bloc tempo doux Z3 sur terrain roulant"
+          },
+          "nutrition": {
+            "calories": 2950,
+            "proteinG": 170,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-08-08",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 170,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-08-09",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 170,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-08-10",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 24,
+          "elevationM": 700,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3050,
+            "proteinG": 170,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Vendredi",
-      "type": "salle",
-      "title": "Full body — priorité deadlift",
-      "exercises": [
-        { "name": "Deadlift", "sets": "4×4", "target": "RPE 7 · priorité" },
-        { "name": "Incline Bench", "sets": "3×8", "target": "RPE 8" },
-        { "name": "Rowing haltère", "sets": "3×10", "target": "RPE 8" },
-        { "name": "Élévations latérales", "sets": "3×15", "target": "RPE 9" },
-        { "name": "Gainage", "sets": "3×45s", "target": "" }
-      ],
-      "note": "Course : repos total (jambes fraîches pour le deadlift).",
-      "done": false
+      "weekNumber": 5,
+      "dateStart": "2026-08-11",
+      "dateEnd": "2026-08-17",
+      "phase": "Deload",
+      "longRunKm": 16,
+      "elevationLoad": "léger",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-08-11",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-12",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 170,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-08-13",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-14",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "5-6",
+            "type": "easy",
+            "description": "Footing facile (semaine allégée)"
+          },
+          "nutrition": {
+            "calories": 2950,
+            "proteinG": 170,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-08-15",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2800,
+            "proteinG": 170,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-08-16",
+          "label": "Samedi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 5-6 km très facile",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-17",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 16,
+          "elevationM": 300,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3050,
+            "proteinG": 170,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Samedi",
-      "type": "course",
-      "title": "Longue sortie",
-      "detail": "75–90 min · montagne/trail · easy strict",
-      "done": false
+      "weekNumber": 6,
+      "dateStart": "2026-08-18",
+      "dateEnd": "2026-08-24",
+      "phase": "Build",
+      "longRunKm": 27,
+      "elevationLoad": "soutenu",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-08-18",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-19",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-08-20",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-21",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "tempo",
+            "description": "Bloc tempo doux Z3 sur terrain roulant"
+          },
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 175,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-08-22",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-08-23",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-08-24",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue vallonné",
+          "distanceKm": 27,
+          "elevationM": 750,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3150,
+            "proteinG": 175,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
     },
     {
-      "day": "Dimanche",
-      "type": "course",
-      "title": "Récup active",
-      "detail": "45 min easy ou rando",
-      "done": false
+      "weekNumber": 7,
+      "dateStart": "2026-08-25",
+      "dateEnd": "2026-08-31",
+      "phase": "Build",
+      "longRunKm": 29,
+      "elevationLoad": "soutenu",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-08-25",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-26",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-08-27",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-08-28",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "côtes",
+            "description": "Répétitions courtes en montée, marche récup"
+          },
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 175,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-08-29",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-08-30",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-08-31",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 29,
+          "elevationM": 800,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3150,
+            "proteinG": 175,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 8,
+      "dateStart": "2026-09-01",
+      "dateEnd": "2026-09-07",
+      "phase": "Deload",
+      "longRunKm": 22,
+      "elevationLoad": "modéré",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-09-01",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-02",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-09-03",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-04",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "5-6",
+            "type": "easy",
+            "description": "Footing facile (semaine allégée)"
+          },
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 175,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-09-05",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2850,
+            "proteinG": 175,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-09-06",
+          "label": "Samedi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 5-6 km très facile",
+          "nutrition": {
+            "calories": 2700,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-07",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 22,
+          "elevationM": 500,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3150,
+            "proteinG": 175,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 9,
+      "dateStart": "2026-09-08",
+      "dateEnd": "2026-09-14",
+      "phase": "Peak",
+      "longRunKm": 32,
+      "elevationLoad": "élevé",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-09-08",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 180,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-09",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-09-10",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 180,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-11",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "côtes",
+            "description": "Répétitions courtes en montée, marche récup"
+          },
+          "nutrition": {
+            "calories": 3050,
+            "proteinG": 180,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-09-12",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-09-13",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-09-14",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 32,
+          "elevationM": 900,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3250,
+            "proteinG": 180,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 10,
+      "dateStart": "2026-09-15",
+      "dateEnd": "2026-09-21",
+      "phase": "Peak",
+      "longRunKm": 34,
+      "elevationLoad": "élevé (proche profil course)",
+      "muscuLegsPhase": "maintenance",
+      "days": [
+        {
+          "date": "2026-09-15",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 180,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-16",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge figée (dernier poids maîtrisé), RPE ≤6-7"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-09-17",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-8 km très facile",
+          "distanceKm": "6-8",
+          "zone": "Z1",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 180,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-18",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "+2.5 kg/sem si RPE ≤8 (progression maintenue)"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "6-8",
+            "type": "tempo",
+            "description": "Bloc tempo doux Z3 sur terrain roulant"
+          },
+          "nutrition": {
+            "calories": 3050,
+            "proteinG": 180,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-09-19",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "maintenance",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge figée, RPE ≤6"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-09-20",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "10-12",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 180,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-09-21",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 34,
+          "elevationM": 950,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3250,
+            "proteinG": 180,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 11,
+      "dateStart": "2026-09-22",
+      "dateEnd": "2026-09-28",
+      "phase": "Taper 1",
+      "longRunKm": 20,
+      "elevationLoad": "modéré",
+      "muscuLegsPhase": "taper",
+      "days": [
+        {
+          "date": "2026-09-22",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-23",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "taper",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge légère, volume réduit"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-09-24",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-25",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "Maintien, volume réduit"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "5-6",
+            "type": "easy",
+            "description": "Footing facile (semaine allégée)"
+          },
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 175,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-09-26",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "taper",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge légère, volume réduit"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-09-27",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "8-10",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-09-28",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 20,
+          "elevationM": 500,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 175,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 12,
+      "dateStart": "2026-09-29",
+      "dateEnd": "2026-10-05",
+      "phase": "Taper 2",
+      "longRunKm": 13,
+      "elevationLoad": "léger",
+      "muscuLegsPhase": "taper",
+      "days": [
+        {
+          "date": "2026-09-29",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-09-30",
+          "label": "Mardi",
+          "type": "gym",
+          "sessionName": "Lower Force",
+          "phase": "taper",
+          "exercises": [
+            {
+              "name": "Full Squat",
+              "sets": 4,
+              "reps": 8,
+              "note": "Charge légère, volume réduit"
+            },
+            {
+              "name": "Romanian Deadlift (barbell)",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "Lunge (barbell)",
+              "sets": 3,
+              "reps": "10/jambe"
+            },
+            {
+              "name": "Seated Leg Curl",
+              "sets": 3,
+              "reps": "8-12"
+            },
+            {
+              "name": "Single Leg Calf Raise",
+              "sets": 4,
+              "reps": "12-14"
+            }
+          ],
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-10-01",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 175,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-10-02",
+          "label": "Jeudi",
+          "type": "gym_and_run",
+          "sessionName": "Upper Force + Course qualité",
+          "phase": "progression",
+          "exercises": [
+            {
+              "name": "Bench Press (barbell)",
+              "sets": "4-6",
+              "reps": "4-12 pyramide",
+              "note": "Maintien, volume réduit"
+            },
+            {
+              "name": "Lat Pulldown",
+              "sets": 4,
+              "reps": "10-12"
+            },
+            {
+              "name": "Shoulder Press (DB)",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Pull Up",
+              "sets": 3,
+              "reps": 8
+            },
+            {
+              "name": "EZ Bar Curl",
+              "sets": 4,
+              "reps": 12
+            },
+            {
+              "name": "Triceps Extension (cable)",
+              "sets": 4,
+              "reps": 12
+            }
+          ],
+          "run": {
+            "distanceKm": "5-6",
+            "type": "easy",
+            "description": "Footing facile (semaine allégée)"
+          },
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 175,
+            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+          }
+        },
+        {
+          "date": "2026-10-03",
+          "label": "Vendredi",
+          "type": "gym",
+          "sessionName": "Full Body",
+          "phase": "taper",
+          "exercises": [
+            {
+              "name": "Deadlift (trap bar)",
+              "sets": "3-4",
+              "reps": 8,
+              "note": "Charge légère, volume réduit"
+            },
+            {
+              "name": "Incline Bench Press (DB)",
+              "sets": 4,
+              "reps": 10
+            },
+            {
+              "name": "Dumbbell Row",
+              "sets": 3,
+              "reps": 10
+            },
+            {
+              "name": "Lateral Raise (cable)",
+              "sets": "3-4",
+              "reps": "10-20"
+            }
+          ],
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Deadlift lourd → protéines + glucides post-séance."
+          }
+        },
+        {
+          "date": "2026-10-04",
+          "label": "Samedi",
+          "type": "run",
+          "description": "Course facile",
+          "distanceKm": "8-10",
+          "zone": "Z1-Z2",
+          "nutrition": {
+            "calories": 2750,
+            "proteinG": 175,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-10-05",
+          "label": "Dimanche",
+          "type": "long_run",
+          "description": "Sortie longue",
+          "distanceKm": 13,
+          "elevationM": 300,
+          "zone": "Z1-Z2, power hike >8%",
+          "nutrition": {
+            "calories": 3000,
+            "proteinG": 175,
+            "note": "Recharge glucides la veille + pendant (gels/barres), hydratation renforcée."
+          }
+        }
+      ]
+    },
+    {
+      "weekNumber": 13,
+      "dateStart": "2026-10-06",
+      "dateEnd": "2026-10-11",
+      "phase": "Affûtage",
+      "longRunKm": null,
+      "elevationLoad": "—",
+      "muscuLegsPhase": "arrêt",
+      "days": [
+        {
+          "date": "2026-10-06",
+          "label": "Lundi",
+          "type": "rest_or_easy",
+          "description": "Repos ou footing court 20-30 min très facile",
+          "nutrition": {
+            "calories": 2500,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-10-07",
+          "label": "Mardi",
+          "type": "rest_or_easy",
+          "description": "Footing court 25 min — arrêt muscu jambes, jambes fraîches",
+          "nutrition": {
+            "calories": 2500,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-10-08",
+          "label": "Mercredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet",
+          "nutrition": {
+            "calories": 2500,
+            "proteinG": 170,
+            "note": "Jour léger / récup, apport normal."
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "label": "Jeudi",
+          "type": "run",
+          "description": "Activation : 20 min easy + 4 lignes",
+          "distanceKm": "4-5",
+          "zone": "Z1 + lignes",
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 170,
+            "note": "Easy, apport normal, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-10-10",
+          "label": "Vendredi",
+          "type": "rest_or_easy",
+          "description": "Repos complet, prépa matériel — recharge glucides J-1",
+          "nutrition": {
+            "calories": 2900,
+            "proteinG": 170,
+            "note": "Recharge glucides J-1, dîner glucidique, hydrate bien."
+          }
+        },
+        {
+          "date": "2026-10-11",
+          "label": "Dimanche",
+          "type": "race",
+          "description": "COURSE — Marathon trail 42K / 900 D+",
+          "distanceKm": 42,
+          "elevationM": 900,
+          "zone": "Power hike >8%, FC <150, plat ~5:15-5:30/km",
+          "goalTime": "4:00:00",
+          "nutrition": {
+            "calories": 3100,
+            "proteinG": 170,
+            "note": "Petit-déj glucidique 3h avant, gels toutes les 40-45 min, électrolytes/hydratation."
+          }
+        }
+      ]
     }
-  ],
-  "nutrition": "Surplus +350–450 kcal/j · Protéines 160 g/j · Glucides post-salle + veille de la longue · Cible +0,2–0,3 kg/sem",
-  "progression": "+2,5 kg/sem squat·bench·OHP·incline (RPE ≤8) · +5 kg/sem deadlift (RPE ≤7)",
-  "vigilance": "Pas de fractionné/seuil ce bloc. Ven→Sam : jambes cuites → longue à dimanche. Easy qui pique = trop rapide."
+  ]
 }

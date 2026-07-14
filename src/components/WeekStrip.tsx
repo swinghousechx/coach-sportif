@@ -1,47 +1,41 @@
 import type { Day } from '../types'
+import { accentFor, ACCENT_CSS } from '../lib/dayMeta'
 
 interface Props {
   days: Day[]
-  done: Record<number, boolean>
-  todayIndex: number
+  isDone: (date: string) => boolean
+  todayDate: string
   onJump: (index: number) => void
 }
 
-// Bande hebdo : un segment par jour, coloré par type (course/salle).
-// Fait = la barre d'accent se remplit d'un balayage (scaleX). Jour courant cerclé.
-// Tap = saut vers la carte du jour. La couleur porte du sens : progression + repérage.
-export default function WeekStrip({ days, done, todayIndex, onJump }: Props) {
+// Bande de la semaine : un segment par jour, coloré par type (course/muscu/repos).
+// Fait = la barre se remplit d'un balayage. Jour courant cerclé. Tap = saut vers la carte.
+export default function WeekStrip({ days, isDone, todayDate, onJump }: Props) {
   return (
     <div className="mt-4 flex items-end gap-1.5" role="list" aria-label="Progression de la semaine">
       {days.map((d, i) => {
-        const isRun = d.type === 'course'
-        const isDone = !!done[i]
-        const isToday = i === todayIndex
-        const accent = isRun ? 'var(--run)' : 'var(--gym)'
+        const done = isDone(d.date)
+        const isToday = d.date === todayDate
+        const accent = ACCENT_CSS[accentFor(d.type)]
         return (
           <button
-            key={`${d.day}-${i}`}
+            key={d.date}
             type="button"
             role="listitem"
             onClick={() => onJump(i)}
-            aria-label={`${d.day} — ${d.title}${isDone ? ' (fait)' : ''}`}
+            aria-label={`${d.label}${done ? ' (fait)' : ''}`}
             aria-current={isToday ? 'date' : undefined}
             className="group flex flex-1 flex-col items-center gap-1.5 rounded-lg py-1 transition-transform duration-150 focus-ring active:scale-90"
           >
             <span
               className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/12"
-              style={
-                isToday
-                  ? { boxShadow: `0 0 0 1.5px ${accent}, 0 0 10px -2px ${accent}` }
-                  : undefined
-              }
+              style={isToday ? { boxShadow: `0 0 0 1.5px ${accent}, 0 0 10px -2px ${accent}` } : undefined}
             >
-              {/* Remplissage qui balaye de gauche à droite quand la séance est faite. */}
               <span
                 className="absolute inset-0 origin-left rounded-full"
                 style={{
                   background: accent,
-                  transform: `scaleX(${isDone ? 1 : 0})`,
+                  transform: `scaleX(${done ? 1 : 0})`,
                   transition: 'transform 400ms var(--ease-out-expo)'
                 }}
               />
@@ -52,7 +46,7 @@ export default function WeekStrip({ days, done, todayIndex, onJump }: Props) {
               }`}
               style={isToday ? { color: accent } : undefined}
             >
-              {d.day.slice(0, 3)}
+              {d.label.slice(0, 3)}
             </span>
           </button>
         )

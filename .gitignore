@@ -12,3 +12,6 @@ public/apple-touch-icon.png
 
 # Fichiers PWA générés
 dev-dist
+
+# TS build info
+*.tsbuildinfo

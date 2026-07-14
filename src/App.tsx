@@ -1,30 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MotionConfig } from 'framer-motion'
 import type { Program } from './types'
-import { isBlockExpired, todayName } from './lib/week'
-import { loadStoredProgram, saveProgram, loadDone, saveDone } from './lib/storage'
-import Header from './components/Header'
+import { currentWeekIndex, todayISO } from './lib/week'
+import { loadStoredProgram, saveProgram, loadDoneOverrides, saveDoneOverrides } from './lib/storage'
+import Tabs, { type TabKey } from './components/Tabs'
+import RaceBanner from './components/RaceBanner'
+import WeekHeader from './components/WeekHeader'
 import DayCard from './components/DayCard'
-import CollapsibleSection from './components/CollapsibleSection'
+import ProgramOverview from './components/ProgramOverview'
 import UpdateButton from './components/UpdateButton'
-import ExpiredBanner from './components/ExpiredBanner'
 
 function prefersReducedMotion() {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  )
+  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 }
 
 export default function App() {
   const [program, setProgram] = useState<Program | null>(null)
   const [loadError, setLoadError] = useState(false)
-  const [done, setDone] = useState<Record<number, boolean>>(() => loadDone())
+  const [tab, setTab] = useState<TabKey>('week')
+  const [overrides, setOverrides] = useState<Record<string, boolean>>(() => loadDoneOverrides())
 
   const dayRefs = useRef<(HTMLElement | null)[]>([])
   const scrolledRef = useRef(false)
 
-  // Chargement initial : programme importé (localStorage) sinon public/program.json.
   useEffect(() => {
     const stored = loadStoredProgram()
     if (stored) {
@@ -40,11 +38,22 @@ export default function App() {
       .catch(() => setLoadError(true))
   }, [])
 
-  const today = useMemo(() => todayName(), [])
-  const todayIndex = useMemo(
-    () => (program ? program.days.findIndex((d) => d.day.toLowerCase() === today) : -1),
+  const today = todayISO()
+
+  // Dates pré-cochées depuis le JSON (day.status === 'done').
+  const seedDone = useMemo(() => {
+    const set = new Set<string>()
+    program?.weeks.forEach((w) => w.days.forEach((d) => d.status === 'done' && set.add(d.date)))
+    return set
+  }, [program])
+
+  const isDone = (date: string) => (date in overrides ? overrides[date] : seedDone.has(date))
+
+  const currentIndex = useMemo(
+    () => (program ? currentWeekIndex(program.weeks, today) : 0),
     [program, today]
   )
+  const currentWeek = program?.weeks[currentIndex]
 
   function scrollToDay(index: number) {
     dayRefs.current[index]?.scrollIntoView({
@@ -53,19 +62,21 @@ export default function App() {
     })
   }
 
-  // Auto-scroll vers le jour courant, une seule fois après le rendu.
+  // Auto-scroll sur le jour du jour, une fois, à l'ouverture (onglet semaine).
   useEffect(() => {
-    if (!program || scrolledRef.current || todayIndex < 0) return
+    if (!currentWeek || scrolledRef.current || tab !== 'week') return
+    const idx = currentWeek.days.findIndex((d) => d.date === today)
+    if (idx < 0) return
     scrolledRef.current = true
-    const t = setTimeout(() => scrollToDay(todayIndex), 350)
+    const t = setTimeout(() => scrollToDay(idx), 350)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [program, todayIndex])
+  }, [currentWeek, tab])
 
-  function toggleDone(index: number) {
-    setDone((prev) => {
-      const next = { ...prev, [index]: !prev[index] }
-      saveDone(next)
+  function toggleDone(date: string) {
+    setOverrides((prev) => {
+      const next = { ...prev, [date]: !isDone(date) }
+      saveDoneOverrides(next)
       return next
     })
   }
@@ -74,9 +85,7 @@ export default function App() {
     saveProgram(next)
     setProgram(next)
     setLoadError(false)
-    setDone({})
-    saveDone({})
-    scrolledRef.current = false
+    scrolledRef.current = false // les coches (par date) sont conservées
   }
 
   if (loadError && !program) {
@@ -92,7 +101,7 @@ export default function App() {
     )
   }
 
-  if (!program) {
+  if (!program || !currentWeek) {
     return (
       <div className="flex min-h-full items-center justify-center" role="status" aria-label="Chargement">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-run" />
@@ -100,51 +109,47 @@ export default function App() {
     )
   }
 
-  const expired = isBlockExpired(program.blockValidUntil)
-
   return (
     <MotionConfig reducedMotion="user">
       <div className="mx-auto min-h-full max-w-md px-4 pb-10 pt-4">
-        {expired && <ExpiredBanner />}
+        <RaceBanner race={program.raceInfo} raceDate={program.raceDate} />
 
-        <Header program={program} done={done} todayIndex={todayIndex} onJump={scrollToDay} />
+        <Tabs value={tab} onChange={setTab} />
 
-        <h2 className="mb-2 px-1 font-display text-lg font-semibold uppercase tracking-widest text-white/55">
-          La semaine
-        </h2>
-
-        <div className="flex flex-col gap-3">
-          {program.days.map((d, i) => (
-            <DayCard
-              key={`${d.day}-${i}`}
-              day={d}
-              index={i}
-              isToday={i === todayIndex}
-              done={!!done[i]}
-              onToggle={() => toggleDone(i)}
-              ref={(el) => {
-                dayRefs.current[i] = el
-              }}
+        {tab === 'week' ? (
+          <>
+            <WeekHeader
+              week={currentWeek}
+              totalWeeks={program.weeks.length}
+              isDone={isDone}
+              todayDate={today}
+              onJump={scrollToDay}
             />
-          ))}
-        </div>
 
-        <div className="mt-6 flex flex-col gap-3">
-          <CollapsibleSection title="Nutrition" icon="flame" tone="text-run">
-            {program.nutrition}
-          </CollapsibleSection>
-          <CollapsibleSection title="Progression" icon="trending-up" tone="text-gym">
-            {program.progression}
-          </CollapsibleSection>
-          <CollapsibleSection title="Vigilance" icon="alert" tone="text-amber-400">
-            {program.vigilance}
-          </CollapsibleSection>
-        </div>
+            <div className="flex flex-col gap-3">
+              {currentWeek.days.map((d, i) => (
+                <DayCard
+                  key={d.date}
+                  day={d}
+                  index={i}
+                  isToday={d.date === today}
+                  done={isDone(d.date)}
+                  onToggle={() => toggleDone(d.date)}
+                  ref={(el) => {
+                    dayRefs.current[i] = el
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <ProgramOverview weeks={program.weeks} currentIndex={currentIndex} isDone={isDone} />
+        )}
 
         <div className="mt-6">
           <UpdateButton onLoaded={handleLoaded} />
           <p className="mt-3 px-2 text-center text-[11px] leading-relaxed text-white/45">
-            Bloc valable jusqu'au {program.blockValidUntil}. Fonctionne hors-ligne une fois installé.
+            Plan marathon trail · course le 11 oct. 2026. Fonctionne hors-ligne une fois installé.
           </p>
         </div>
       </div>

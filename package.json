@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "icons": "node scripts/generate-icons.mjs",
+    "plan": "node scripts/gen-plan.mjs",
     "dev": "vite",
     "build": "npm run icons && tsc -b && vite build",
     "preview": "vite preview"

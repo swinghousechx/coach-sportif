@@ -1,15 +1,16 @@
 import type { Program } from '../types'
-import { isoWeekKey } from './week'
 
 const PROGRAM_KEY = 'coach:program'
-const DONE_KEY = 'coach:done'
+const DONE_KEY = 'coach:done:v2' // clé par date (yyyy-mm-dd), pas de reset hebdo
 
 // ---- Programme (fichier chargé manuellement, prioritaire sur public/program.json) ----
 
 export function loadStoredProgram(): Program | null {
   try {
     const raw = localStorage.getItem(PROGRAM_KEY)
-    return raw ? (JSON.parse(raw) as Program) : null
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    return isValidProgram(data) ? data : null // ignore un ancien format incompatible
   } catch {
     return null
   }
@@ -23,39 +24,27 @@ export function clearStoredProgram(): void {
   localStorage.removeItem(PROGRAM_KEY)
 }
 
-/** Valide grossièrement un JSON importé avant de le considérer comme un programme. */
+/** Valide grossièrement un JSON importé (nouveau modèle : weeks[] avec days[]). */
 export function isValidProgram(data: unknown): data is Program {
   if (!data || typeof data !== 'object') return false
   const p = data as Record<string, unknown>
-  return (
-    typeof p.blockName === 'string' &&
-    typeof p.blockValidUntil === 'string' &&
-    Array.isArray(p.days) &&
-    p.days.length > 0
-  )
+  if (typeof p.raceDate !== 'string' || !Array.isArray(p.weeks) || p.weeks.length === 0) return false
+  const w0 = p.weeks[0] as Record<string, unknown>
+  return !!w0 && Array.isArray(w0.days) && w0.days.length > 0
 }
 
-// ---- Coches "fait" : persistées, mais réinitialisées au changement de semaine ISO ----
+// ---- Coches "fait" : overrides utilisateur par date, persistés sans reset ----
+// L'état affiché = statut du JSON (day.status === 'done') fusionné avec ces overrides.
 
-type DoneState = {
-  week: string
-  done: Record<number, boolean>
-}
-
-export function loadDone(now = new Date()): Record<number, boolean> {
-  const currentWeek = isoWeekKey(now)
+export function loadDoneOverrides(): Record<string, boolean> {
   try {
     const raw = localStorage.getItem(DONE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw) as DoneState
-    if (parsed.week !== currentWeek) return {} // nouvelle semaine → reset
-    return parsed.done ?? {}
+    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {}
   } catch {
     return {}
   }
 }
 
-export function saveDone(done: Record<number, boolean>, now = new Date()): void {
-  const state: DoneState = { week: isoWeekKey(now), done }
-  localStorage.setItem(DONE_KEY, JSON.stringify(state))
+export function saveDoneOverrides(overrides: Record<string, boolean>): void {
+  localStorage.setItem(DONE_KEY, JSON.stringify(overrides))
 }

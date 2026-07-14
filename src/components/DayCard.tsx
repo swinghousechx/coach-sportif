@@ -1,6 +1,10 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import type { Day } from '../types'
+import type { Day, RunDetail } from '../types'
+import { accentFor, typeLabel, typeIcon, ACCENT_TEXT, ACCENT_BG, ACCENT_RING } from '../lib/dayMeta'
+import Icon from './Icon'
+import NutritionBlock from './NutritionBlock'
+import StravaLink from './StravaLink'
 
 interface Props {
   day: Day
@@ -16,17 +20,20 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
   { day, index, isToday, done, onToggle },
   ref
 ) {
-  const isRun = day.type === 'course'
-  const accentText = isRun ? 'text-run' : 'text-gym'
-  const accentBg = isRun ? 'bg-run/15' : 'bg-gym/15'
+  const accent = accentFor(day.type)
+  const accentText = ACCENT_TEXT[accent]
+  const isRace = day.type === 'race'
+  const hasExercises = !!day.exercises && day.exercises.length > 0
+  const showRunSummary =
+    day.type === 'run' || day.type === 'long_run' || day.type === 'hike' || isRace
+  const canStrava = day.type === 'run' || day.type === 'long_run' || day.type === 'hike'
+
+  const title = day.sessionName ?? day.description ?? typeLabel(day.type)
 
   return (
     <motion.section
       ref={ref}
-      // Entrée en cascade rapide et plafonnée (rythme de liste), une seule fois au montage.
       initial={{ opacity: 0, y: 10 }}
-      // L'opacité "done" est pilotée ici : elle grise vraiment la carte (l'inline framer
-      // primait sinon sur la classe opacity-55).
       animate={{ opacity: done ? 0.55 : 1, y: 0 }}
       transition={{
         opacity: { duration: 0.3, ease: 'easeOut' },
@@ -34,89 +41,125 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
       }}
       className={[
         'glass relative p-4',
-        isToday ? `bg-white/[0.07] ${isRun ? 'ring-2 ring-run/70' : 'ring-2 ring-gym/70'}` : ''
+        isToday ? `bg-white/[0.07] ring-2 ${ACCENT_RING[accent]}` : '',
+        isRace && !isToday ? 'ring-2 ring-run/50' : ''
       ].join(' ')}
       style={
-        isToday
-          ? { boxShadow: `0 8px 40px -12px ${isRun ? 'rgba(252,76,2,0.35)' : 'rgba(185,255,60,0.28)'}` }
+        isToday || isRace
+          ? { boxShadow: `0 8px 40px -12px ${accent === 'run' || isRace ? 'rgba(252,76,2,0.35)' : accent === 'gym' ? 'rgba(185,255,60,0.28)' : 'rgba(255,255,255,0.15)'}` }
           : undefined
       }
     >
-      {/* Liseré d'accent vertical à gauche */}
       <span
         aria-hidden
-        className={`absolute left-0 top-4 bottom-4 w-1 rounded-full ${isRun ? 'bg-run' : 'bg-gym'}`}
+        className={`absolute left-0 top-4 bottom-4 w-1 rounded-full ${
+          accent === 'run' ? 'bg-run' : accent === 'gym' ? 'bg-gym' : 'bg-white/25'
+        }`}
       />
 
       <div className="flex items-start justify-between gap-3 pl-2">
         <div className="min-w-0">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className={`badge ${accentBg} ${accentText}`}>{isRun ? 'Course' : 'Salle'}</span>
+            <span className={`badge ${ACCENT_BG[accent]} ${accentText} inline-flex items-center gap-1`}>
+              <Icon name={typeIcon(day.type)} size={12} />
+              {typeLabel(day.type)}
+            </span>
             <span className="font-display text-sm font-semibold uppercase tracking-widest text-white/55">
-              {day.day}
+              {day.label}
             </span>
             {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
           </div>
 
           <h2
-            className={`text-balance font-display text-xl font-semibold leading-tight tracking-tight transition-colors duration-300 ${
-              done ? 'text-white/70 line-through decoration-white/40' : 'text-white'
-            }`}
+            className={`text-balance font-display font-semibold leading-tight tracking-tight ${
+              isRace ? 'text-2xl' : 'text-xl'
+            } ${done ? 'text-white/70 line-through decoration-white/40' : 'text-white'}`}
           >
-            {day.title}
+            {title}
           </h2>
 
-          {day.detail && (
-            <p className="mt-1 text-[13px] leading-snug text-white/70">{day.detail}</p>
+          {isRace && day.goalTime && (
+            <p className="mt-1 font-display text-sm font-semibold uppercase tracking-widest text-run">
+              Objectif {day.goalTime.replace(':00:00', 'h')}
+            </p>
+          )}
+
+          {!day.sessionName && day.description && showRunSummary && day.description !== title && (
+            <p className="mt-1 text-[13px] leading-snug text-white/70">{day.description}</p>
+          )}
+          {day.type === 'rest_or_easy' && (
+            <p className="mt-1 text-[13px] leading-snug text-white/70">{day.description}</p>
           )}
         </div>
 
-        <ToggleDone done={done} onToggle={onToggle} label={day.title} />
+        <ToggleDone done={done} onToggle={onToggle} label={title} />
       </div>
 
-      {day.exercises && day.exercises.length > 0 && (
+      {showRunSummary && <RunSummary detail={day} className="pl-2" />}
+
+      {hasExercises && (
         <ul className="mt-3 divide-y divide-white/5 border-t border-white/5 pl-2 pt-1">
-          {day.exercises.map((ex, i) => {
-            const isPriority = !!ex.target && /priorit/i.test(ex.target)
-            return (
-              <li key={i} className="flex items-baseline justify-between gap-3 py-2">
-                <span className="flex min-w-0 items-baseline gap-1.5">
-                  {isPriority && (
-                    <span
-                      aria-hidden
-                      className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isRun ? 'bg-run' : 'bg-gym'}`}
-                    />
-                  )}
-                  <span className="min-w-0 truncate text-[15px] text-white/90">{ex.name}</span>
-                </span>
-                <span className="flex shrink-0 items-baseline gap-2 text-right">
-                  <span className={`font-display text-lg font-bold tabular-nums tracking-wide ${accentText}`}>
-                    {ex.sets}
-                  </span>
-                  {ex.target && (
-                    <span
-                      className={`text-[11px] font-semibold uppercase tracking-wide ${
-                        isPriority ? accentText : 'text-white/55'
-                      }`}
-                    >
-                      {ex.target}
-                    </span>
-                  )}
-                </span>
-              </li>
-            )
-          })}
+          {day.exercises!.map((ex, i) => (
+            <li key={i} className="flex items-baseline justify-between gap-3 py-2">
+              <span className="min-w-0">
+                <span className="block truncate text-[15px] text-white/90">{ex.name}</span>
+                {ex.note && (
+                  <span className="mt-0.5 block text-[11px] leading-snug text-white/45">{ex.note}</span>
+                )}
+              </span>
+              <span
+                className={`shrink-0 font-display text-lg font-bold tabular-nums tracking-wide ${accentText}`}
+              >
+                {ex.sets}×{ex.reps}
+              </span>
+            </li>
+          ))}
         </ul>
       )}
 
-      {day.note && (
-        <p className="mt-3 rounded-xl border border-white/5 bg-black/25 px-3 py-2 text-[12px] leading-snug text-white/65">
-          {day.note}
-        </p>
+      {/* Bloc course dans une journée muscu + course (jeudi). */}
+      {day.type === 'gym_and_run' && day.run && (
+        <div className="mt-3 rounded-2xl border border-run/20 bg-run/[0.06] p-3">
+          <div className="mb-1 flex items-center gap-2">
+            <Icon name="activity" size={15} className="text-run" />
+            <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-run">
+              Course qualité
+            </span>
+          </div>
+          {day.run.description && (
+            <p className="text-[13px] leading-snug text-white/80">{day.run.description}</p>
+          )}
+          <RunSummary detail={day.run} className="mt-2" />
+          <StravaLink day={day} />
+        </div>
       )}
+
+      {canStrava && <StravaLink day={day} />}
+
+      {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
     </motion.section>
   )
 })
+
+// Résumé course : distance, D+, zone/allure sous forme de stats compactes.
+function RunSummary({ detail, className = '' }: { detail: RunDetail; className?: string }) {
+  const items: { icon: 'route' | 'mountain' | 'heart'; value: string }[] = []
+  if (detail.distanceKm != null) items.push({ icon: 'route', value: `${detail.distanceKm} km` })
+  if (detail.elevationM != null) items.push({ icon: 'mountain', value: `${detail.elevationM} m D+` })
+  if (detail.zone) items.push({ icon: 'heart', value: detail.zone })
+  if (items.length === 0) return null
+
+  return (
+    <div className={`mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 ${className}`}>
+      {items.map((it, i) => (
+        <span key={i} className="flex items-center gap-1.5">
+          <Icon name={it.icon} size={15} className="shrink-0 text-white/40" />
+          <span className="text-[13px] font-medium text-white/85">{it.value}</span>
+        </span>
+      ))}
+    </div>
+  )
+}
 
 function ToggleDone({
   done,
@@ -131,7 +174,6 @@ function ToggleDone({
   const prev = useRef(done)
   const [pulse, setPulse] = useState(0)
 
-  // Impulsion de succès uniquement quand l'utilisateur coche (non → oui), jamais au montage.
   useEffect(() => {
     if (done && !prev.current && !reduce) setPulse((p) => p + 1)
     prev.current = done
@@ -153,7 +195,6 @@ function ToggleDone({
           : 'border-white/30 bg-white/5 text-white/55 hover:border-white/50 hover:text-white/80'
       ].join(' ')}
     >
-      {/* Onde de succès, jouée une fois par validation. */}
       <AnimatePresence>
         {pulse > 0 && (
           <motion.span
@@ -168,7 +209,6 @@ function ToggleDone({
         )}
       </AnimatePresence>
 
-      {/* Coche qui se trace au moment de la validation. */}
       <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="currentColor" strokeWidth={3}>
         <motion.path
           d="M5 13l4 4L19 7"
