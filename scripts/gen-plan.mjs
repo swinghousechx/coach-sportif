@@ -17,21 +17,22 @@ const addDays = (iso, n) => {
 }
 const LABELS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 
-// ---- Vue macro des 13 semaines (tableau section 2 du plan) ----
+// ---- Vue macro des 13 semaines (vrai calendrier : semaines lundi→dimanche réels) ----
+// Chaque semaine démarre un VRAI lundi ; la course tombe le dimanche 11/10 (fin de S13).
 const MACRO = [
-  { wn: 1, start: '2026-07-14', phase: 'Consolidation', long: 16, load: 'modéré', longElev: 400, longDesc: 'vallonné', legs: 'progression' },
-  { wn: 2, start: '2026-07-21', phase: 'Build', long: 19, load: 'modéré', longElev: 500, longDesc: 'vallonné', legs: 'progression' },
-  { wn: 3, start: '2026-07-28', phase: 'Build', long: 22, load: 'modéré+', longElev: 600, legs: 'progression' },
-  { wn: 4, start: '2026-08-04', phase: 'Build', long: 24, load: 'soutenu', longElev: 700, legs: 'maintenance' },
-  { wn: 5, start: '2026-08-11', phase: 'Deload', long: 16, load: 'léger', longElev: 300, legs: 'maintenance', deload: true },
-  { wn: 6, start: '2026-08-18', phase: 'Build', long: 27, load: 'soutenu', longElev: 750, longDesc: 'vallonné', legs: 'maintenance' },
-  { wn: 7, start: '2026-08-25', phase: 'Build', long: 29, load: 'soutenu', longElev: 800, legs: 'maintenance' },
-  { wn: 8, start: '2026-09-01', phase: 'Deload', long: 22, load: 'modéré', longElev: 500, legs: 'maintenance', deload: true },
-  { wn: 9, start: '2026-09-08', phase: 'Peak', long: 32, load: 'élevé', longElev: 900, legs: 'maintenance' },
-  { wn: 10, start: '2026-09-15', phase: 'Peak', long: 34, load: 'élevé (proche profil course)', longElev: 950, legs: 'maintenance' },
-  { wn: 11, start: '2026-09-22', phase: 'Taper 1', long: 20, load: 'modéré', longElev: 500, legs: 'taper', taper: true },
-  { wn: 12, start: '2026-09-29', phase: 'Taper 2', long: 13, load: 'léger', longElev: 300, legs: 'taper', taper: true },
-  { wn: 13, start: '2026-10-06', phase: 'Affûtage', long: null, load: '—', legs: 'arrêt', race: true }
+  { wn: 1, start: '2026-07-13', phase: 'Consolidation', long: 16, load: 'modéré', longElev: 400, longDesc: 'vallonné', legs: 'progression' },
+  { wn: 2, start: '2026-07-20', phase: 'Build', long: 19, load: 'modéré', longElev: 500, longDesc: 'vallonné', legs: 'progression' },
+  { wn: 3, start: '2026-07-27', phase: 'Build', long: 22, load: 'modéré+', longElev: 600, legs: 'progression' },
+  { wn: 4, start: '2026-08-03', phase: 'Build', long: 24, load: 'soutenu', longElev: 700, legs: 'maintenance' },
+  { wn: 5, start: '2026-08-10', phase: 'Deload', long: 16, load: 'léger', longElev: 300, legs: 'maintenance', deload: true },
+  { wn: 6, start: '2026-08-17', phase: 'Build', long: 27, load: 'soutenu', longElev: 750, longDesc: 'vallonné', legs: 'maintenance' },
+  { wn: 7, start: '2026-08-24', phase: 'Build', long: 29, load: 'soutenu', longElev: 800, legs: 'maintenance' },
+  { wn: 8, start: '2026-08-31', phase: 'Deload', long: 22, load: 'modéré', longElev: 500, legs: 'maintenance', deload: true },
+  { wn: 9, start: '2026-09-07', phase: 'Peak', long: 32, load: 'élevé', longElev: 900, legs: 'maintenance' },
+  { wn: 10, start: '2026-09-14', phase: 'Peak', long: 34, load: 'élevé (proche profil course)', longElev: 950, legs: 'maintenance' },
+  { wn: 11, start: '2026-09-21', phase: 'Taper 1', long: 20, load: 'modéré', longElev: 500, legs: 'taper', taper: true },
+  { wn: 12, start: '2026-09-28', phase: 'Taper 2', long: 13, load: 'léger', longElev: 300, legs: 'taper', taper: true },
+  { wn: 13, start: '2026-10-05', phase: 'Affûtage', long: null, load: '—', legs: 'arrêt', race: true }
 ]
 
 // ---- Nutrition : cibles par palier de phase (éditables chaque semaine) ----
@@ -111,23 +112,19 @@ function buildWeek(m) {
   const day = (i, extra) => ({ date: addDays(m.start, i), label: LABELS[i], ...extra })
 
   if (m.race) {
-    // Semaine 13 — affûtage, arrêt jambes, course le dimanche 11/10 (semaine partielle 6 j).
+    // Semaine 13 — affûtage, arrêt jambes, course le dimanche 11/10 (index 6).
     days.push(day(0, { type: 'rest_or_easy', description: 'Repos ou footing court 20-30 min très facile', nutrition: nut(m.wn, 'easy') }))
     days.push(day(1, { type: 'rest_or_easy', description: 'Footing court 25 min — arrêt muscu jambes, jambes fraîches', nutrition: nut(m.wn, 'easy') }))
     days.push(day(2, { type: 'rest_or_easy', description: 'Repos complet', nutrition: nut(m.wn, 'easy') }))
     days.push(day(3, { type: 'run', description: 'Activation : 20 min easy + 4 lignes', distanceKm: '4-5', zone: 'Z1 + lignes', nutrition: nut(m.wn, 'run') }))
-    days.push(day(4, { type: 'rest_or_easy', description: 'Repos complet, prépa matériel — recharge glucides J-1', nutrition: { calories: tier(m.wn).long, proteinG: tier(m.wn).p, note: 'Recharge glucides J-1, dîner glucidique, hydrate bien.' } }))
-    // Jour de course : date figée sur raceDate (2026-10-11).
-    days.push({ date: '2026-10-11', label: 'Dimanche', type: 'race', description: 'COURSE — Marathon trail 42K / 900 D+', distanceKm: 42, elevationM: 900, zone: 'Power hike >8%, FC <150, plat ~5:15-5:30/km', goalTime: '4:00:00', nutrition: nut(m.wn, 'race') })
+    days.push(day(4, { type: 'rest_or_easy', description: 'Repos complet', nutrition: nut(m.wn, 'easy') }))
+    days.push(day(5, { type: 'rest_or_easy', description: 'Déblocage : 15-20 min + 3 lignes — prépa matériel, recharge glucides J-1', nutrition: { calories: tier(m.wn).long, proteinG: tier(m.wn).p, note: 'Recharge glucides J-1, dîner glucidique, hydrate bien.' } }))
+    days.push(day(6, { type: 'race', description: 'COURSE — Marathon trail 42K / 900 D+', distanceKm: 42, elevationM: 900, zone: 'Power hike >8%, FC <150, plat ~5:15-5:30/km', goalTime: '4:00:00', nutrition: nut(m.wn, 'race') }))
     return days
   }
 
-  // Lundi : récup post-longue (S1 = hike déjà faite).
-  if (m.wn === 1) {
-    days.push(day(0, { type: 'hike', status: 'done', description: 'Balade / hike easy', distanceKm: 9.3, nutrition: { calories: null, proteinG: 160, note: 'Jour easy, pas de reco spécifique.' } }))
-  } else {
-    days.push(day(0, { type: 'rest_or_easy', description: 'Repos ou footing 6-7 km très facile (récup post-longue)', nutrition: nut(m.wn, 'easy') }))
-  }
+  // Lundi : récup post-longue (repos ou footing très facile).
+  days.push(day(0, { type: 'rest_or_easy', description: 'Repos ou footing 6-7 km très facile (récup post-longue)', nutrition: nut(m.wn, 'easy') }))
 
   // Mardi : Lower Force
   days.push(day(1, { ...lower(m.legs), nutrition: nut(m.wn, 'legs') }))
@@ -190,7 +187,7 @@ const program = {
   weeks: MACRO.map((m) => ({
     weekNumber: m.wn,
     dateStart: m.start,
-    dateEnd: m.race ? '2026-10-11' : addDays(m.start, 6),
+    dateEnd: addDays(m.start, 6),
     phase: m.phase,
     longRunKm: m.long,
     elevationLoad: m.load,
