@@ -26,7 +26,8 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
   const hasExercises = !!day.exercises && day.exercises.length > 0
   const showRunSummary =
     day.type === 'run' || day.type === 'long_run' || day.type === 'hike' || isRace
-  const canStrava = day.type === 'run' || day.type === 'long_run' || day.type === 'hike'
+  const isMuscu = day.type === 'gym' || day.type === 'gym_and_run'
+  const isRunFamily = day.type === 'run' || day.type === 'long_run' || day.type === 'hike' || isRace
 
   const title = day.sessionName ?? day.description ?? typeLabel(day.type)
 
@@ -117,6 +118,9 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         </ul>
       )}
 
+      {/* Muscu : Hevy remonte la séance sur Strava (WeightTraining) → matching + réalisé. */}
+      {isMuscu && <StravaLink summary={day.strava} />}
+
       {/* Bloc course dans une journée muscu + course (jeudi). */}
       {day.type === 'gym_and_run' && day.run && (
         <div className="mt-3 rounded-2xl border border-run/20 bg-run/[0.06] p-3">
@@ -130,11 +134,11 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
             <p className="text-[13px] leading-snug text-white/80">{day.run.description}</p>
           )}
           <RunSummary detail={day.run} className="mt-2" />
-          <StravaLink day={day} />
+          <StravaLink summary={day.runStrava} />
         </div>
       )}
 
-      {canStrava && <StravaLink day={day} />}
+      {isRunFamily && <StravaLink summary={day.strava} />}
 
       {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
     </motion.section>

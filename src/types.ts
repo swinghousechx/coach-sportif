@@ -31,14 +31,30 @@ export interface Nutrition {
   note?: string
 }
 
-/** Résumé d'activité Strava (rempli plus tard si sync backend). */
+/** Un exercice réalisé, extrait de la description Hevy d'une activité muscu Strava. */
+export interface StravaSetSummary {
+  name: string
+  sets?: number
+  topWeight?: string // ex. "100 kg"
+  reps?: string // ex. "8, 8, 6"
+}
+
+/**
+ * Résumé d'une activité Strava (rempli par un futur sync backend).
+ * Couvre course (Run/TrailRun) ET muscu (WeightTraining via Hevy).
+ */
 export interface StravaSummary {
   activityId: number
-  distanceKm: number
-  elevationM: number
-  movingTime: string
+  sportType: 'run' | 'weight'
+  // course
+  distanceKm?: number
+  elevationM?: number
+  movingTime?: string
   avgHr?: number
   avgPace?: string
+  // muscu : soit exercices déjà parsés, soit la description Hevy brute (parsée à l'affichage)
+  exercises?: StravaSetSummary[]
+  description?: string
 }
 
 export interface Day {
@@ -56,7 +72,8 @@ export interface Day {
   elevationM?: number
   goalTime?: string // jour de course
   nutrition?: Nutrition
-  strava?: StravaSummary // rempli si l'activité correspondante est synchronisée
+  strava?: StravaSummary // activité principale du jour (muscu ou course)
+  runStrava?: StravaSummary // activité course d'une journée muscu + course (jeudi)
 }
 
 export interface Week {

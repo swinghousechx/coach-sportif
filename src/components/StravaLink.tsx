@@ -1,52 +1,95 @@
-import type { Day } from '../types'
+import type { StravaSummary } from '../types'
+import { parseHevyDescription } from '../lib/hevy'
 import Icon from './Icon'
 
 // Version simplifiée (pas d'OAuth sur un hébergement statique) :
-// un lien qui ouvre le journal Strava pour vérifier la séance à la main.
-// Si `day.strava` est rempli (sync backend futur), on affiche le résumé réel vs prévu.
+// tant qu'il n'y a pas de sync backend, on affiche un lien "Vérifier sur Strava".
+// Dès que `summary` est rempli (sync futur), on montre le résumé réel — course OU muscu
+// (Hevy remonte la muscu en WeightTraining avec exercices/charges dans la description).
 const STRAVA_LOG = 'https://www.strava.com/athlete/training'
 
-export default function StravaLink({ day }: { day: Day }) {
-  const s = day.strava
+export default function StravaLink({ summary }: { summary?: StravaSummary }) {
+  if (!summary) return <VerifyButton />
+  return summary.sportType === 'run' ? <RunSynced s={summary} /> : <WeightSynced s={summary} />
+}
 
+function VerifyButton() {
   return (
-    <div className="mt-3">
-      {s ? (
-        <div className="rounded-2xl border border-run/25 bg-run/10 p-3">
-          <div className="mb-2 flex items-center gap-2">
-            <StravaMark />
-            <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-run">
-              Synchronisé Strava
-            </span>
-          </div>
-          <dl className="grid grid-cols-4 gap-2 text-center">
-            <Stat label="Dist." value={`${s.distanceKm} km`} />
-            <Stat label="D+" value={`${s.elevationM} m`} />
-            <Stat label="FC moy." value={s.avgHr ? `${s.avgHr}` : '—'} />
-            <Stat label="Allure" value={s.avgPace ?? '—'} />
-          </dl>
-          <a
-            href={`https://www.strava.com/activities/${s.activityId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="focus-ring mt-2 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-run/90 hover:text-run"
-          >
-            Voir l'activité <Icon name="external" size={14} />
-          </a>
-        </div>
-      ) : (
-        <a
-          href={STRAVA_LOG}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="focus-ring inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
-        >
-          <StravaMark />
-          Vérifier sur Strava
-          <Icon name="external" size={14} />
-        </a>
-      )}
+    <a
+      href={STRAVA_LOG}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
+    >
+      <StravaMark />
+      Vérifier sur Strava
+      <Icon name="external" size={14} />
+    </a>
+  )
+}
+
+function SyncedShell({ s, children }: { s: StravaSummary; children: React.ReactNode }) {
+  return (
+    <div className="mt-3 rounded-2xl border border-run/25 bg-run/10 p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <StravaMark />
+        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-run">
+          Synchronisé Strava
+        </span>
+      </div>
+      {children}
+      <a
+        href={`https://www.strava.com/activities/${s.activityId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="focus-ring mt-2 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-run/90 hover:text-run"
+      >
+        Voir l'activité <Icon name="external" size={14} />
+      </a>
     </div>
+  )
+}
+
+function RunSynced({ s }: { s: StravaSummary }) {
+  return (
+    <SyncedShell s={s}>
+      <dl className="grid grid-cols-4 gap-2 text-center">
+        <Stat label="Dist." value={s.distanceKm != null ? `${s.distanceKm} km` : '—'} />
+        <Stat label="D+" value={s.elevationM != null ? `${s.elevationM} m` : '—'} />
+        <Stat label="FC moy." value={s.avgHr ? `${s.avgHr}` : '—'} />
+        <Stat label="Allure" value={s.avgPace ?? '—'} />
+      </dl>
+    </SyncedShell>
+  )
+}
+
+// Muscu réalisée (parsée depuis la description Hevy) — à comparer aux exercices planifiés au-dessus.
+function WeightSynced({ s }: { s: StravaSummary }) {
+  // Exercices déjà parsés, sinon parsés à la volée depuis la description Hevy brute.
+  const ex = s.exercises ?? parseHevyDescription(s.description ?? '')
+  return (
+    <SyncedShell s={s}>
+      {ex.length > 0 ? (
+        <>
+          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-white/45">Réalisé</div>
+          <ul className="divide-y divide-white/5">
+            {ex.map((e, i) => (
+              <li key={i} className="flex items-baseline justify-between gap-3 py-1.5">
+                <span className="min-w-0 truncate text-[13px] text-white/85">{e.name}</span>
+                <span className="shrink-0 text-right">
+                  {e.topWeight && (
+                    <span className="font-display text-sm font-bold tabular-nums text-run">{e.topWeight}</span>
+                  )}
+                  {e.reps && <span className="ml-2 text-[11px] tabular-nums text-white/45">{e.reps}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="text-[12px] text-white/60">Séance muscu enregistrée.</p>
+      )}
+    </SyncedShell>
   )
 }
 
