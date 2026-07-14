@@ -112,12 +112,15 @@ export default function CoachDebrief({ day, week, program }: Props) {
         <div className="overflow-hidden">
           <div className="pt-2.5">
             {debriefActivities(result).map((a, i) => {
+              const isMuscu = a.kind === 'muscu'
+              // Pour la muscu : pas de distance / D+ / allure (non pertinent).
+              // Pour la course : on masque aussi les 0 (sortie plate).
               const stats = [
-                a.distanceKm != null ? `${a.distanceKm} km` : null,
-                a.elevationM != null ? `${a.elevationM} m D+` : null,
+                !isMuscu && a.distanceKm ? `${a.distanceKm} km` : null,
+                !isMuscu && a.elevationM ? `${a.elevationM} m D+` : null,
                 a.movingTime,
                 a.avgHr != null ? `FC ${a.avgHr}` : null,
-                a.avgPace ? `${a.avgPace}/km` : null
+                !isMuscu && a.avgPace ? `${a.avgPace}/km` : null
               ].filter(Boolean)
               return (
                 <div key={i} className="mb-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-[12px] text-white/70">
