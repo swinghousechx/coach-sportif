@@ -21,6 +21,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
   const [result, setResult] = useState<DebriefResult | null>(() => loadDebrief(day.date))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [open, setOpen] = useState(false) // replié par défaut (déplié après une génération)
 
   async function run(force = false) {
     setLoading(true)
@@ -29,6 +30,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
       const r = await fetchDebrief(day, week, program, force)
       setResult(r)
       saveDebrief(day.date, r)
+      setOpen(true)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'erreur'
       setError(
@@ -74,13 +76,24 @@ export default function CoachDebrief({ day, week, program }: Props) {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="mt-3 rounded-2xl border border-gym/25 bg-gym/[0.06] p-3.5"
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="focus-ring flex items-center gap-2"
+        >
+          <Icon
+            name="chevron"
+            size={16}
+            className="text-gym transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
+            style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          />
           <Icon name="activity" size={15} className="text-gym" />
           <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-gym">
             Débrief du coach
           </span>
-        </span>
+        </button>
         <button
           type="button"
           onClick={() => run(true)}
@@ -91,33 +104,43 @@ export default function CoachDebrief({ day, week, program }: Props) {
         </button>
       </div>
 
-      {debriefActivities(result).map((a, i) => {
-        const stats = [
-          a.distanceKm != null ? `${a.distanceKm} km` : null,
-          a.elevationM != null ? `${a.elevationM} m D+` : null,
-          a.movingTime,
-          a.avgHr != null ? `FC ${a.avgHr}` : null,
-          a.avgPace ? `${a.avgPace}/km` : null
-        ].filter(Boolean)
-        return (
-          <div key={i} className="mb-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-[12px] text-white/70">
-            {a.kind && (
-              <span className={`font-display text-[10px] font-semibold uppercase tracking-wide ${a.kind === 'muscu' ? 'text-gym' : 'text-run'}`}>
-                {a.kind === 'muscu' ? 'Muscu' : 'Course'}
-              </span>
-            )}
-            {stats.map((s, j) => (
-              <span key={j}>
-                {j > 0 && '· '}
-                {s}
-              </span>
-            ))}
-          </div>
-        )
-      })}
+      {/* Corps repliable (grid-template-rows 0fr→1fr). */}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 [transition-timing-function:var(--ease-out-expo)]"
+        style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+      >
+        <div className="overflow-hidden">
+          <div className="pt-2.5">
+            {debriefActivities(result).map((a, i) => {
+              const stats = [
+                a.distanceKm != null ? `${a.distanceKm} km` : null,
+                a.elevationM != null ? `${a.elevationM} m D+` : null,
+                a.movingTime,
+                a.avgHr != null ? `FC ${a.avgHr}` : null,
+                a.avgPace ? `${a.avgPace}/km` : null
+              ].filter(Boolean)
+              return (
+                <div key={i} className="mb-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-[12px] text-white/70">
+                  {a.kind && (
+                    <span className={`font-display text-[10px] font-semibold uppercase tracking-wide ${a.kind === 'muscu' ? 'text-gym' : 'text-run'}`}>
+                      {a.kind === 'muscu' ? 'Muscu' : 'Course'}
+                    </span>
+                  )}
+                  {stats.map((s, j) => (
+                    <span key={j}>
+                      {j > 0 && '· '}
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )
+            })}
 
-      <Markdown text={result.debrief} />
-      {error && <p className="mt-1.5 text-[12px] text-amber-300">{error}</p>}
+            <Markdown text={result.debrief} />
+            {error && <p className="mt-1.5 text-[12px] text-amber-300">{error}</p>}
+          </div>
+        </div>
+      </div>
     </motion.div>
   )
 }
