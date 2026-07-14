@@ -136,6 +136,8 @@ export default function App() {
                   isToday={d.date === today}
                   done={isDone(d.date)}
                   onToggle={() => toggleDone(d.date)}
+                  week={currentWeek}
+                  program={program}
                   ref={(el) => {
                     dayRefs.current[i] = el
                   }}

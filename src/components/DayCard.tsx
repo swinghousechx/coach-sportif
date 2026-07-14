@@ -1,10 +1,12 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import type { Day, RunDetail } from '../types'
+import type { Day, Program, RunDetail, Week } from '../types'
 import { accentFor, typeLabel, typeIcon, ACCENT_TEXT, ACCENT_BG, ACCENT_RING } from '../lib/dayMeta'
+import { isCoachEnabled } from '../lib/coach'
 import Icon from './Icon'
 import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
+import CoachDebrief from './CoachDebrief'
 
 interface Props {
   day: Day
@@ -12,12 +14,14 @@ interface Props {
   isToday: boolean
   done: boolean
   onToggle: () => void
+  week?: Week
+  program?: Program
 }
 
 const EASE_EXPO = [0.16, 1, 0.3, 1] as const
 
 const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
-  { day, index, isToday, done, onToggle },
+  { day, index, isToday, done, onToggle, week, program },
   ref
 ) {
   const accent = accentFor(day.type)
@@ -141,6 +145,11 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
       {isRunFamily && <StravaLink summary={day.strava} />}
 
       {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
+
+      {/* Débrief IA de la séance réelle (Strava) — seulement si le backend est branché. */}
+      {isCoachEnabled() && week && program && day.type !== 'rest_or_easy' && (
+        <CoachDebrief day={day} week={week} program={program} />
+      )}
     </motion.section>
   )
 })

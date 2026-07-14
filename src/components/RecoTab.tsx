@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import type { Program } from '../types'
 import { buildReco, type Reco } from '../lib/reco'
+import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
 import Icon from './Icon'
 
 const STRAVA_LOG = 'https://www.strava.com/athlete/training'
@@ -48,27 +49,7 @@ export default function RecoTab({ program, todayDate }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {/* Synchro Strava */}
-      <div className="glass p-4">
-        <div className="flex items-center gap-2.5">
-          <StravaMark size={18} />
-          <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
-            Strava
-          </span>
-        </div>
-        <p className="mt-1.5 text-[13px] leading-snug text-white/60">
-          Sync auto (course + muscu Hevy) bientôt. Pour l'instant, ouvre ton journal pour pointer la séance.
-        </p>
-        <a
-          href={STRAVA_LOG}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
-        >
-          <StravaMark size={14} />
-          Synchroniser Strava
-          <Icon name="external" size={14} />
-        </a>
-      </div>
+      <StravaCard />
 
       {/* Analyse à la demande */}
       {state !== 'done' ? (
@@ -151,6 +132,68 @@ function RecoCard({ reco, reduce, onRefresh }: { reco: Reco; reduce: boolean; on
       >
         Réinitialiser
       </button>
+    </div>
+  )
+}
+
+// Carte Strava : bouton de connexion réel si le backend est branché, sinon lien simplifié.
+function StravaCard() {
+  const enabled = isCoachEnabled()
+  const [connected, setConnected] = useState<boolean | null>(enabled ? null : false)
+
+  useEffect(() => {
+    if (enabled) coachStatus().then(setConnected)
+  }, [enabled])
+
+  return (
+    <div className="glass p-4">
+      <div className="flex items-center gap-2.5">
+        <StravaMark size={18} />
+        <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
+          Strava
+        </span>
+        {enabled && connected && (
+          <span className="badge bg-emerald-400/15 text-emerald-300">Connecté</span>
+        )}
+      </div>
+
+      {enabled ? (
+        connected ? (
+          <p className="mt-1.5 text-[13px] leading-snug text-white/60">
+            Compte connecté. Touche « Débrief du coach » sur une séance pour analyser le réalisé.
+          </p>
+        ) : (
+          <>
+            <p className="mt-1.5 text-[13px] leading-snug text-white/60">
+              Connecte ton compte pour que le coach analyse tes séances réelles (course + muscu Hevy).
+            </p>
+            <a
+              href={stravaConnectUrl()}
+              className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
+            >
+              <StravaMark size={14} />
+              Connecter Strava
+              <Icon name="external" size={14} />
+            </a>
+          </>
+        )
+      ) : (
+        <>
+          <p className="mt-1.5 text-[13px] leading-snug text-white/60">
+            Sync auto (course + muscu Hevy) bientôt. Pour l'instant, ouvre ton journal pour pointer la séance.
+          </p>
+          <a
+            href={STRAVA_LOG}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
+          >
+            <StravaMark size={14} />
+            Synchroniser Strava
+            <Icon name="external" size={14} />
+          </a>
+        </>
+      )}
     </div>
   )
 }

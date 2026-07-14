@@ -30,6 +30,10 @@ jobs:
         run: npm run build
         env:
           VITE_BASE: /coach-sportif/
+          # Coach backend (optionnel) : définis la variable de dépôt COACH_API
+          # (Settings → Secrets and variables → Actions → Variables) et le secret COACH_SECRET.
+          VITE_COACH_API: ${{ vars.COACH_API }}
+          VITE_COACH_SECRET: ${{ secrets.COACH_SECRET }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

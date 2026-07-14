@@ -1,0 +1,24 @@
+name = "coach-strava"
+main = "src/worker.js"
+compatibility_date = "2026-01-01"
+
+# Namespace KV pour stocker les tokens Strava + le cache des débriefs.
+# Crée-le avec :  wrangler kv namespace create TOKENS
+# puis colle l'id renvoyé ci-dessous.
+kv_namespaces = [
+  { binding = "TOKENS", id = "REMPLACE_PAR_TON_KV_ID" }
+]
+
+[vars]
+# Origine de l'app (pour le CORS + la redirection retour OAuth).
+APP_ORIGIN = "https://swinghousechx.github.io/coach-sportif/"
+# URL de callback OAuth = <URL du worker>/callback (à renseigner aussi dans l'app Strava).
+APP_REDIRECT = "https://coach-strava.TON-SOUS-DOMAINE.workers.dev/callback"
+# Effort du modèle pour le débrief : low | medium | high
+EFFORT = "medium"
+
+# Secrets (NE PAS mettre ici) — définis-les avec wrangler secret put :
+#   wrangler secret put STRAVA_CLIENT_ID
+#   wrangler secret put STRAVA_CLIENT_SECRET
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put APP_SECRET      (un mot de passe que tu choisis, partagé avec l'app)
