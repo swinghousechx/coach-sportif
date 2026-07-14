@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { Day, Program, Week } from '../types'
 import {
+  debriefActivities,
   fetchDebrief,
   loadDebrief,
   saveDebrief,
@@ -90,15 +91,30 @@ export default function CoachDebrief({ day, week, program }: Props) {
         </button>
       </div>
 
-      {result.activity && (
-        <div className="mb-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-white/70">
-          {result.activity.distanceKm != null && <span>{result.activity.distanceKm} km</span>}
-          {result.activity.elevationM != null && <span>· {result.activity.elevationM} m D+</span>}
-          {result.activity.movingTime && <span>· {result.activity.movingTime}</span>}
-          {result.activity.avgHr != null && <span>· FC {result.activity.avgHr}</span>}
-          {result.activity.avgPace && <span>· {result.activity.avgPace}/km</span>}
-        </div>
-      )}
+      {debriefActivities(result).map((a, i) => {
+        const stats = [
+          a.distanceKm != null ? `${a.distanceKm} km` : null,
+          a.elevationM != null ? `${a.elevationM} m D+` : null,
+          a.movingTime,
+          a.avgHr != null ? `FC ${a.avgHr}` : null,
+          a.avgPace ? `${a.avgPace}/km` : null
+        ].filter(Boolean)
+        return (
+          <div key={i} className="mb-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-[12px] text-white/70">
+            {a.kind && (
+              <span className={`font-display text-[10px] font-semibold uppercase tracking-wide ${a.kind === 'muscu' ? 'text-gym' : 'text-run'}`}>
+                {a.kind === 'muscu' ? 'Muscu' : 'Course'}
+              </span>
+            )}
+            {stats.map((s, j) => (
+              <span key={j}>
+                {j > 0 && '· '}
+                {s}
+              </span>
+            ))}
+          </div>
+        )
+      })}
 
       <Markdown text={result.debrief} />
       {error && <p className="mt-1.5 text-[12px] text-amber-300">{error}</p>}

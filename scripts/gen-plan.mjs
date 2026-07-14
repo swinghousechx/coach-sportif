@@ -139,15 +139,14 @@ function buildWeek(m) {
     })
   )
 
-  // Jeudi : Upper Force + course qualité (côtes/tempo)
-  const isCotes = m.wn % 2 === 1
-  const qualDist = m.deload || m.taper ? '5-6' : '6-8'
-  const qualRun = m.deload || m.taper
-    ? { distanceKm: qualDist, type: 'easy', description: 'Footing facile (semaine allégée)' }
-    : isCotes
-      ? { distanceKm: qualDist, type: 'côtes', description: 'Répétitions courtes en montée, marche récup' }
-      : { distanceKm: qualDist, type: 'tempo', description: 'Bloc tempo doux Z3 sur terrain roulant' }
-  days.push(day(3, { ...upper(m.legs, qualRun), nutrition: nut(m.wn, 'double') }))
+  // Jeudi : Upper Force seul (muscu — le haut du corps progresse toute la durée).
+  // (Plus de double séance : la course qualité a été retirée, le bloc reste 100% easy.)
+  days.push(
+    day(3, {
+      ...upper(m.legs),
+      nutrition: { calories: tier(m.wn).gym, proteinG: tier(m.wn).p, note: 'Protéines dans les 2h post-séance (haut du corps).' }
+    })
+  )
 
   // Vendredi : Full Body (deadlift prioritaire)
   days.push(day(4, { ...fullBody(m.legs), nutrition: nut(m.wn, 'full') }))

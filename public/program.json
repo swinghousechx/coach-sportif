@@ -85,8 +85,8 @@
         {
           "date": "2026-07-16",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -121,15 +121,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "côtes",
-            "description": "Répétitions courtes en montée, marche récup"
-          },
           "nutrition": {
-            "calories": 2900,
+            "calories": 2800,
             "proteinG": 165,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -272,8 +267,8 @@
         {
           "date": "2026-07-23",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -308,15 +303,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "tempo",
-            "description": "Bloc tempo doux Z3 sur terrain roulant"
-          },
           "nutrition": {
-            "calories": 2900,
+            "calories": 2800,
             "proteinG": 165,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -459,8 +449,8 @@
         {
           "date": "2026-07-30",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -495,15 +485,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "côtes",
-            "description": "Répétitions courtes en montée, marche récup"
-          },
           "nutrition": {
-            "calories": 2900,
+            "calories": 2800,
             "proteinG": 165,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -646,8 +631,8 @@
         {
           "date": "2026-08-06",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -682,15 +667,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "tempo",
-            "description": "Bloc tempo doux Z3 sur terrain roulant"
-          },
           "nutrition": {
-            "calories": 2950,
+            "calories": 2800,
             "proteinG": 170,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -831,8 +811,8 @@
         {
           "date": "2026-08-13",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -867,15 +847,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "5-6",
-            "type": "easy",
-            "description": "Footing facile (semaine allégée)"
-          },
           "nutrition": {
-            "calories": 2950,
+            "calories": 2800,
             "proteinG": 170,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1016,8 +991,8 @@
         {
           "date": "2026-08-20",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1052,15 +1027,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "tempo",
-            "description": "Bloc tempo doux Z3 sur terrain roulant"
-          },
           "nutrition": {
-            "calories": 3000,
+            "calories": 2850,
             "proteinG": 175,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1203,8 +1173,8 @@
         {
           "date": "2026-08-27",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1239,15 +1209,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "côtes",
-            "description": "Répétitions courtes en montée, marche récup"
-          },
           "nutrition": {
-            "calories": 3000,
+            "calories": 2850,
             "proteinG": 175,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1388,8 +1353,8 @@
         {
           "date": "2026-09-03",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1424,15 +1389,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "5-6",
-            "type": "easy",
-            "description": "Footing facile (semaine allégée)"
-          },
           "nutrition": {
-            "calories": 3000,
+            "calories": 2850,
             "proteinG": 175,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1573,8 +1533,8 @@
         {
           "date": "2026-09-10",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1609,15 +1569,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "côtes",
-            "description": "Répétitions courtes en montée, marche récup"
-          },
           "nutrition": {
-            "calories": 3050,
+            "calories": 2900,
             "proteinG": 180,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1760,8 +1715,8 @@
         {
           "date": "2026-09-17",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1796,15 +1751,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "6-8",
-            "type": "tempo",
-            "description": "Bloc tempo doux Z3 sur terrain roulant"
-          },
           "nutrition": {
-            "calories": 3050,
+            "calories": 2900,
             "proteinG": 180,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -1945,8 +1895,8 @@
         {
           "date": "2026-09-24",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -1981,15 +1931,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "5-6",
-            "type": "easy",
-            "description": "Footing facile (semaine allégée)"
-          },
           "nutrition": {
-            "calories": 2900,
+            "calories": 2750,
             "proteinG": 175,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {
@@ -2130,8 +2075,8 @@
         {
           "date": "2026-10-01",
           "label": "Jeudi",
-          "type": "gym_and_run",
-          "sessionName": "Upper Force + Course qualité",
+          "type": "gym",
+          "sessionName": "Upper Force",
           "phase": "progression",
           "exercises": [
             {
@@ -2166,15 +2111,10 @@
               "reps": 12
             }
           ],
-          "run": {
-            "distanceKm": "5-6",
-            "type": "easy",
-            "description": "Footing facile (semaine allégée)"
-          },
           "nutrition": {
-            "calories": 2900,
+            "calories": 2750,
             "proteinG": 175,
-            "note": "Double sollicitation muscu + course → fractionne l’apport sur la journée."
+            "note": "Protéines dans les 2h post-séance (haut du corps)."
           }
         },
         {

@@ -1,15 +1,11 @@
 // Backend "Coach" — Cloudflare Worker.
-// Rôle : détenir le secret Strava + la clé Anthropic (impossibles à cacher en statique),
-// gérer l'OAuth Strava (mono-utilisateur), et produire un débrief de séance rédigé par Claude.
+// Détient les secrets (Strava + Anthropic), gère l'OAuth Strava (mono-utilisateur),
+// récupère la/les séance(s) réelle(s) du jour et fait rédiger un débrief par Claude Opus 4.8.
+// Un jour peut contenir DEUX séances (muscu + course) → le débrief couvre les deux.
 //
-// Routes :
-//   GET  /auth      → redirige vers l'autorisation Strava
-//   GET  /callback  → échange le code, stocke les tokens (KV), renvoie vers l'app
-//   GET  /status    → { connected: bool }
-//   POST /debrief   → { date, planned, matchType, context } → { debrief, activity, cached }
-//
-// Secrets (wrangler secret put) : STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, ANTHROPIC_API_KEY, APP_SECRET
-// Bindings : TOKENS (KV), vars APP_ORIGIN, APP_REDIRECT, EFFORT
+// Routes : GET /auth · GET /callback · GET /status · POST /debrief
+// Secrets : STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, ANTHROPIC_API_KEY, APP_SECRET
+// Bindings : TOKENS (KV) · vars APP_ORIGIN, APP_REDIRECT, EFFORT
 
 const TOKEN_KEY = 'strava_tokens'
 const RUN_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Hike', 'Walk']
@@ -85,7 +81,6 @@ async function handleStatus(env) {
   return json({ connected: !!raw })
 }
 
-// Renvoie un access token valide (rafraîchit si expiré).
 async function getAccessToken(env) {
   const raw = await env.TOKENS.get(TOKEN_KEY)
   if (!raw) return null
@@ -119,10 +114,9 @@ async function handleDebrief(request, env) {
     return json({ error: 'unauthorized' }, 401)
 
   const body = await request.json().catch(() => ({}))
-  const { date, planned, matchType, context, force } = body
+  const { date, planned, context, force } = body
   if (!date || !planned) return json({ error: 'bad_request' }, 400)
 
-  // Cache par date (borne les appels payants). Régénérable via force=true.
   const cacheKey = `debrief:${date}`
   if (!force) {
     const cached = await env.TOKENS.get(cacheKey)
@@ -132,32 +126,32 @@ async function handleDebrief(request, env) {
   const token = await getAccessToken(env)
   if (!token) return json({ error: 'not_connected' }, 409)
 
-  const activity = await findActivity(token, date, matchType)
-  const summary = activity && (await enrichActivity(token, activity.id))
+  // Récupère TOUTES les séances du jour (muscu ET/OU course).
+  const { weight, run } = await findActivities(token, date)
+  const actuals = []
+  if (weight) actuals.push(activitySummary(await enrichActivity(token, weight.id), 'muscu'))
+  if (run) actuals.push(activitySummary(await enrichActivity(token, run.id), 'course'))
 
-  const debrief = await callClaude(env, { planned, context, actual: summary })
-  const payload = { debrief, activity: summary ? activitySummary(summary) : null }
+  const debrief = await callClaude(env, { planned, context, actuals })
+  const payload = { debrief, activities: actuals }
   await env.TOKENS.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 * 120 })
   return json({ ...payload, cached: false })
 }
 
-// Cherche l'activité Strava de la date, matchée par type (run / weight).
-async function findActivity(token, date, matchType) {
+// Première activité muscu + première activité course de la date.
+async function findActivities(token, date) {
   const start = Math.floor(new Date(date + 'T00:00:00').getTime() / 1000)
-  const end = start + 86400
   const res = await fetch(
-    `https://www.strava.com/api/v3/athlete/activities?after=${start - 43200}&before=${end + 43200}&per_page=30`,
+    `https://www.strava.com/api/v3/athlete/activities?after=${start - 43200}&before=${start + 86400 + 43200}&per_page=30`,
     { headers: { authorization: `Bearer ${token}` } }
   )
-  if (!res.ok) return null
+  if (!res.ok) return { weight: null, run: null }
   const acts = await res.json()
-  const wanted = matchType === 'weight' ? WEIGHT_TYPES : RUN_TYPES
-  // Même jour local + bon type.
-  return (
-    acts.find((a) => a.start_date_local?.slice(0, 10) === date && wanted.includes(a.sport_type)) ||
-    acts.find((a) => a.start_date_local?.slice(0, 10) === date) ||
-    null
-  )
+  const sameDay = acts.filter((a) => a.start_date_local?.slice(0, 10) === date)
+  return {
+    weight: sameDay.find((a) => WEIGHT_TYPES.includes(a.sport_type)) || null,
+    run: sameDay.find((a) => RUN_TYPES.includes(a.sport_type)) || null
+  }
 }
 
 async function enrichActivity(token, id) {
@@ -167,12 +161,14 @@ async function enrichActivity(token, id) {
   return res.ok ? res.json() : null
 }
 
-function activitySummary(a) {
+function activitySummary(a, kind) {
+  if (!a) return { kind }
   const paceSecPerKm = a.average_speed ? 1000 / a.average_speed : null
   const pace = paceSecPerKm
     ? `${Math.floor(paceSecPerKm / 60)}:${String(Math.round(paceSecPerKm % 60)).padStart(2, '0')}`
     : null
   return {
+    kind, // 'muscu' | 'course'
     id: a.id,
     name: a.name,
     sport_type: a.sport_type,
@@ -195,18 +191,20 @@ function fmtDuration(s) {
 // ---- Claude (le coach) ----
 
 const SYSTEM_PROMPT = `Tu es le meilleur coach du monde en endurance (trail/marathon) ET en force (musculation). \
-Ton athlète prépare un marathon trail 42K/900 D+ avec objectif sub-4h. Tu débriefes UNE séance : tu compares le PRÉVU (planifié) au RÉALISÉ (activité Strava). \
-Principes du plan : course 100% easy (>5:01/km, allure conversation) sauf qualité ; power hiking en montée avec FC <150 bpm ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
-Écris en français, tutoiement, ton direct et motivant mais honnête. Sois concret et chiffré. Structure courte en markdown : \
-une ligne **Bilan** (verdict global), puis **Ce qui va** (2-3 puces), **À surveiller** (1-3 puces si pertinent), **Pour la suite** (1-2 conseils actionnables). \
-Si aucune activité Strava n'a été trouvée, dis-le franchement et donne un rappel de ce qu'il fallait faire. Pas de blabla, pas d'intro générique. Maximum ~180 mots.`
+Ton athlète prépare un marathon trail 42K/900 D+ avec objectif sub-4h. Tu débriefes UNE journée d'entraînement : compare le PRÉVU au(x) séance(s) RÉALISÉE(S) sur Strava. \
+IMPORTANT : il peut y avoir DEUX séances le même jour (muscu ET course) — dans ce cas, débriefe LES DEUX. \
+Pour la muscu, les charges/séries sont dans le champ description de l'activité (export Hevy) : exploite-les. \
+Principes du plan : course 100% easy (>5:01/km, allure conversation) ; power hiking en montée avec FC <150 bpm ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
+Écris en français, tutoiement, ton direct et motivant mais honnête, concret et chiffré. Structure courte en markdown : \
+une ligne **Bilan** (verdict global de la journée), puis **Ce qui va** (2-4 puces), **À surveiller** (1-3 puces si pertinent), **Pour la suite** (1-2 conseils actionnables). \
+S'il y a deux séances, mentionne explicitement chacune (muscu / course). Si aucune activité Strava n'est trouvée, dis-le franchement et rappelle ce qui était prévu. Pas d'intro générique. Maximum ~200 mots.`
 
-async function callClaude(env, { planned, context, actual }) {
+async function callClaude(env, { planned, context, actuals }) {
   const userContent =
     `SÉANCE PRÉVUE (JSON) :\n${JSON.stringify(planned)}\n\n` +
     `CONTEXTE PLAN (JSON) :\n${JSON.stringify(context || {})}\n\n` +
-    (actual
-      ? `SÉANCE RÉALISÉE — Strava (JSON) :\n${JSON.stringify(actual)}`
+    (actuals.length
+      ? `SÉANCE(S) RÉALISÉE(S) — Strava (JSON, ${actuals.length}) :\n${JSON.stringify(actuals)}`
       : `SÉANCE RÉALISÉE : aucune activité Strava trouvée pour cette date.`)
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -218,7 +216,7 @@ async function callClaude(env, { planned, context, actual }) {
     },
     body: JSON.stringify({
       model: 'claude-opus-4-8',
-      max_tokens: 1200,
+      max_tokens: 1400,
       output_config: { effort: env.EFFORT || 'medium' },
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userContent }]

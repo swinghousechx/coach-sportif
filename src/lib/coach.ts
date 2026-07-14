@@ -27,6 +27,7 @@ export async function coachStatus(): Promise<boolean> {
 }
 
 export interface DebriefActivity {
+  kind?: 'muscu' | 'course'
   name?: string
   sport_type?: string
   distanceKm?: number | null
@@ -38,8 +39,15 @@ export interface DebriefActivity {
 
 export interface DebriefResult {
   debrief: string
-  activity: DebriefActivity | null
+  activities?: DebriefActivity[]
+  activity?: DebriefActivity | null // ancienne forme (rétro-compat cache)
   cached?: boolean
+}
+
+/** Normalise vers un tableau (gère l'ancienne forme `activity`). */
+export function debriefActivities(r: DebriefResult): DebriefActivity[] {
+  if (r.activities) return r.activities.filter(Boolean)
+  return r.activity ? [r.activity] : []
 }
 
 /** Type d'activité Strava attendu pour ce jour. */
