@@ -18,7 +18,8 @@ const WEIGHT_TYPES = ['WeightTraining', 'Workout', 'Crossfit']
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
-    const origin = env.APP_ORIGIN || '*'
+    // CORS : le navigateur exige l'ORIGINE seule (schéma+hôte, sans chemin).
+    const origin = env.APP_ORIGIN ? new URL(env.APP_ORIGIN).origin : '*'
 
     if (request.method === 'OPTIONS') return cors(new Response(null, { status: 204 }), origin)
 

@@ -6,14 +6,14 @@ compatibility_date = "2026-01-01"
 # Crée-le avec :  wrangler kv namespace create TOKENS
 # puis colle l'id renvoyé ci-dessous.
 kv_namespaces = [
-  { binding = "TOKENS", id = "REMPLACE_PAR_TON_KV_ID" }
+  { binding = "TOKENS", id = "bf7b84ae175c4546bca7ae846217707b" }
 ]
 
 [vars]
 # Origine de l'app (pour le CORS + la redirection retour OAuth).
 APP_ORIGIN = "https://swinghousechx.github.io/coach-sportif/"
 # URL de callback OAuth = <URL du worker>/callback (à renseigner aussi dans l'app Strava).
-APP_REDIRECT = "https://coach-strava.TON-SOUS-DOMAINE.workers.dev/callback"
+APP_REDIRECT = "https://coach-strava.spochat.workers.dev/callback"
 # Effort du modèle pour le débrief : low | medium | high
 EFFORT = "medium"
 
