@@ -20,17 +20,6 @@
         {
           "date": "2026-07-13",
           "label": "Lundi",
-          "type": "rest_or_easy",
-          "description": "Repos ou footing 6-7 km très facile (récup post-longue)",
-          "nutrition": {
-            "calories": 2600,
-            "proteinG": 165,
-            "note": "Jour léger / récup, apport normal."
-          }
-        },
-        {
-          "date": "2026-07-14",
-          "label": "Mardi",
           "type": "gym",
           "sessionName": "Lower Force",
           "phase": "progression",
@@ -66,6 +55,18 @@
             "calories": 2800,
             "proteinG": 165,
             "note": "Jambes lourdes → priorité protéines dans les 2h post-séance."
+          }
+        },
+        {
+          "date": "2026-07-14",
+          "label": "Mardi",
+          "type": "hike",
+          "description": "Balade / hike easy (14 juillet férié — salle fermée, muscu faite lundi)",
+          "distanceKm": 9.3,
+          "nutrition": {
+            "calories": 2600,
+            "proteinG": 165,
+            "note": "Jour easy / récup, apport normal."
           }
         },
         {
