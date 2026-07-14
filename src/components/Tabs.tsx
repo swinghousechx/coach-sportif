@@ -1,4 +1,4 @@
-export type TabKey = 'week' | 'plan'
+export type TabKey = 'week' | 'plan' | 'reco'
 
 interface Props {
   value: TabKey
@@ -6,18 +6,15 @@ interface Props {
 }
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: 'week', label: 'Cette semaine' },
-  { key: 'plan', label: 'Programme complet' }
+  { key: 'week', label: 'Semaine' },
+  { key: 'plan', label: 'Programme' },
+  { key: 'reco', label: 'Reco' }
 ]
 
 // Segmented control en verre, dans le style existant.
 export default function Tabs({ value, onChange }: Props) {
   return (
-    <div
-      role="tablist"
-      aria-label="Vues du programme"
-      className="glass mb-4 grid grid-cols-2 gap-1 p-1"
-    >
+    <div role="tablist" aria-label="Vues du programme" className="glass mb-4 grid grid-cols-3 gap-1 p-1">
       {TABS.map((t) => {
         const active = t.key === value
         return (
@@ -27,7 +24,7 @@ export default function Tabs({ value, onChange }: Props) {
             aria-selected={active}
             onClick={() => onChange(t.key)}
             className={[
-              'focus-ring rounded-2xl px-3 py-2.5 font-display text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200',
+              'focus-ring rounded-2xl px-2 py-2.5 font-display text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200',
               active ? 'bg-white/12 text-white' : 'text-white/50 hover:text-white/75'
             ].join(' ')}
           >

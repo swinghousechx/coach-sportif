@@ -8,6 +8,7 @@ import RaceBanner from './components/RaceBanner'
 import WeekHeader from './components/WeekHeader'
 import DayCard from './components/DayCard'
 import ProgramOverview from './components/ProgramOverview'
+import RecoTab from './components/RecoTab'
 import UpdateButton from './components/UpdateButton'
 
 function prefersReducedMotion() {
@@ -116,7 +117,7 @@ export default function App() {
 
         <Tabs value={tab} onChange={setTab} />
 
-        {tab === 'week' ? (
+        {tab === 'week' && (
           <>
             <WeekHeader
               week={currentWeek}
@@ -142,9 +143,13 @@ export default function App() {
               ))}
             </div>
           </>
-        ) : (
+        )}
+
+        {tab === 'plan' && (
           <ProgramOverview weeks={program.weeks} currentIndex={currentIndex} isDone={isDone} />
         )}
+
+        {tab === 'reco' && <RecoTab program={program} todayDate={today} />}
 
         <div className="mt-6">
           <UpdateButton onLoaded={handleLoaded} />
