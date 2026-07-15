@@ -413,8 +413,16 @@ async function handleEtat(request, env) {
   if (request.method !== 'POST') return json({ error: 'not_found' }, 404)
 
   const body = await request.json().catch(() => ({}))
-  const date = String(body.date || '').slice(0, 10)
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json({ error: 'date_invalide' }, 400)
+
+  // Date facultative : sans elle, c'est aujourd'hui. Raccourcis produit « 15/07/2026 »
+  // par défaut, que le format ISO refuse — obliger à reformater ajoutait une action et
+  // le motif d'échec le plus probable. Le raccourci tourne au réveil : « aujourd'hui »
+  // est la seule réponse sensée de toute façon.
+  const date = body.date
+    ? String(body.date).slice(0, 10)
+    : new Date().toISOString().slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+    return json({ error: 'date_invalide', attendu: 'AAAA-MM-JJ, ou rien du tout', recu: body.date }, 400)
 
   // Un raccourci qui rate son coup envoie 0, "", ou une valeur absurde : on refuse
   // plutôt que d'empoisonner le raisonnement du coach avec une FC de repos à 0.

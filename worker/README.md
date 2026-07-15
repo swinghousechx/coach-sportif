@@ -145,9 +145,13 @@ Actions, dans l'ordre :
 3. **Obtenir le contenu de** `https://coach-strava.spochat.workers.dev/etat`
    - Méthode : `POST`
    - En-têtes : `x-app-secret` = *(ton APP_SECRET)* · `Content-Type` = `application/json`
-   - Corps de la requête : `JSON`
-     - `date` (Texte) → `Date actuelle` formatée `yyyy-MM-dd`
+   - Corps de la requête : `JSON` → un seul champ :
      - `hrRest` (Nombre) → variable `FC`
+
+Pas de champ `date` : sans elle, le worker prend aujourd'hui. Raccourcis produit
+« 15/07/2026 » par défaut, que le format ISO refuse — l'exiger ajoutait une action et le
+motif d'échec le plus probable. Le raccourci tourne au réveil : « aujourd'hui » est la
+seule réponse sensée.
 
 Le sommeil se rajoute en option : mêmes actions avec le type `Analyse du sommeil`, puis
 somme des durées des échantillons « endormi » de la nuit, envoyée en `sleepHours` (heures
@@ -159,7 +163,7 @@ l'essentiel du signal de récup, commence par elle.
 - `hrRest` n'est accepté qu'entre **25 et 120**, `sleepHours` entre **0,5 et 16**. Un
   raccourci qui rate son coup envoie `0` ou une chaîne vide : la route répond **400** et
   ne stocke rien, plutôt que d'empoisonner le raisonnement du coach.
-- La date doit être **ISO** (`2026-07-15`). Le format français est refusé.
+- La date est **facultative** (aujourd'hui par défaut). Si tu l'envoies, elle doit être **ISO** (`2026-07-15`) — le format français est refusé, avec un message explicite.
 - Stockage KV par date, TTL 120 jours.
 - Dans l'app, le mesuré **pré-remplit** et la saisie manuelle **gagne toujours** : une
   valeur corrigée à la main n'est jamais réécrasée.
