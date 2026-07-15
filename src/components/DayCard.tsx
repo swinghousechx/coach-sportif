@@ -7,6 +7,7 @@ import Icon from './Icon'
 import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
 import CoachDebrief from './CoachDebrief'
+import Targets from './Targets'
 
 interface Props {
   day: Day
@@ -186,6 +187,9 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           )}
 
           {isRunFamily && <StravaLink summary={day.strava} />}
+
+          {/* Cibles chiffrées de la sortie (allure, FC, D+), depuis le profil réel. */}
+          {program && <Targets day={day} program={program} />}
 
           {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
 

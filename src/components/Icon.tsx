@@ -21,6 +21,7 @@ type Name =
   | 'refresh'
   | 'message'
   | 'send'
+  | 'target'
 
 const PATHS: Record<Name, JSX.Element> = {
   // Ligne de rythme cardio — la course / l'effort.
@@ -110,6 +111,14 @@ const PATHS: Record<Name, JSX.Element> = {
     <>
       <path d="M12 20V5" />
       <path d="M6 11l6-6 6 6" />
+    </>
+  ),
+  // Cibles — cercles concentriques.
+  target: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="0.6" />
     </>
   )
 }

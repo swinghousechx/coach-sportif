@@ -1,4 +1,5 @@
 import type { Adaptation, Day, Program, Week } from '../types'
+import { computeZones, fmtPace, medianHrRest, type Profil } from './zones'
 
 // Client du backend "Coach" (Cloudflare Worker). Tout est optionnel :
 // si VITE_COACH_API n'est pas défini, la fonctionnalité reste masquée et l'app
@@ -101,7 +102,10 @@ export async function fetchDebrief(
         raceDate: program.raceDate,
         raceInfo: program.raceInfo,
         week: { weekNumber: week.weekNumber, phase: week.phase, muscuLegsPhase: week.muscuLegsPhase },
-        etatDuJour: loadEtat(day.date) ?? undefined
+        etatDuJour: loadEtat(day.date) ?? undefined,
+        // Mêmes zones/allures que celles affichées à l'athlète : un débrief qui juge
+        // « FC trop haute » doit le faire sur SES zones, pas sur une intuition.
+        profil: profilContext()
       }
     })
   })
@@ -110,6 +114,66 @@ export async function fetchDebrief(
     throw new Error(detail.error || `erreur ${r.status}`)
   }
   return { ...(await r.json()), planKey }
+}
+
+// ---- Profil physiologique (mesuré sur Strava) ----
+
+const PROFIL_KEY = 'coach:profil'
+
+export function loadProfil(): Profil | null {
+  try {
+    return JSON.parse(localStorage.getItem(PROFIL_KEY) || 'null')
+  } catch {
+    return null
+  }
+}
+
+export function saveProfil(p: Profil): void {
+  try {
+    localStorage.setItem(PROFIL_KEY, JSON.stringify(p))
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Profil + zones tels qu'affichés dans l'app, pour que le coach raisonne sur les
+ * mêmes chiffres que l'athlète (et ne réinvente pas ses zones à chaque réponse).
+ */
+export function profilContext() {
+  const p = loadProfil()
+  if (!p) return undefined
+  const hrRest = medianHrRest()
+  const zones = p.hrMax ? computeZones(p.hrMax, hrRest) : null
+  return {
+    mesureSur: `${p.runs} sorties depuis le ${p.since}`,
+    hrMax: p.hrMax,
+    hrRest,
+    easyPace: p.easyPaceSec ? `${fmtPace(p.easyPaceSec)}/km` : undefined,
+    easyHrMedian: p.easyHrMedian,
+    volumeHebdoKm: p.weeklyKm,
+    plusLongueKm: p.longestKm,
+    zonesFc: zones
+      ? {
+          methode: zones.method === 'karvonen' ? 'réserve cardiaque (Karvonen)' : '% FC max',
+          ...Object.fromEntries(zones.zones.map((z) => [z.key, `${z.lo}-${z.hi} bpm`]))
+        }
+      : undefined
+  }
+}
+
+export async function fetchProfil(force = false): Promise<Profil> {
+  if (!API) throw new Error('coach non configuré')
+  const r = await fetch(`${API}/profil${force ? '?force=1' : ''}`, {
+    headers: { ...(SECRET ? { 'x-app-secret': SECRET } : {}) }
+  })
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}))
+    throw new Error(detail.error || `erreur ${r.status}`)
+  }
+  const p = (await r.json()) as Profil
+  saveProfil(p)
+  return p
 }
 
 // ---- Chat avec le coach ----
@@ -187,7 +251,9 @@ export async function chatCoach(
         seanceDeDemain: ctx.tomorrow,
         // La semaine entière : indispensable pour décaler une séance à bon escient.
         semaineEnCours: ctx.week.days,
-        etatDuJour: loadEtat(ctx.today) ?? undefined
+        etatDuJour: loadEtat(ctx.today) ?? undefined,
+        // Le coach doit citer les MÊMES chiffres que ceux affichés sur les séances.
+        profil: profilContext()
       }
     })
   })

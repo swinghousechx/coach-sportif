@@ -5,6 +5,7 @@ import { buildReco, type Reco } from '../lib/reco'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
 import ChatCoach from './ChatCoach'
 import EtatDuJour from './EtatDuJour'
+import ProfilCard from './ProfilCard'
 import Icon from './Icon'
 
 const STRAVA_LOG = 'https://www.strava.com/athlete/training'
@@ -57,6 +58,9 @@ export default function RecoTab({ program, todayDate, onApplyAdaptation }: Props
 
       {/* État du jour (récup subjective + FC repos → pris en compte par le coach) */}
       {isCoachEnabled() && <EtatDuJour date={todayDate} />}
+
+      {/* Profil mesuré sur Strava → zones FC recalibrées, cibles de chaque sortie */}
+      {isCoachEnabled() && <ProfilCard />}
 
       {/* Conversation avec le coach (douleur, fatigue, adaptation de séance) */}
       {isCoachEnabled() && resolved.entry && (

@@ -27,6 +27,7 @@ export default {
         return cors(await handleDebrief(request, env), origin)
       if (url.pathname === '/chat' && request.method === 'POST')
         return cors(await handleChat(request, env), origin)
+      if (url.pathname === '/profil') return cors(await handleProfil(request, env), origin)
       return cors(json({ error: 'not_found' }, 404), origin)
     } catch (e) {
       return cors(json({ error: 'server_error', message: String(e?.message || e) }, 500), origin)
@@ -199,6 +200,97 @@ function fmtDuration(s) {
   return h ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`
 }
 
+// ---- Profil physiologique (dérivé des vraies séances Strava) ----
+//
+// Le plan fixe ses repères FC « par âge (indicatives) » et demande une recalibration
+// dès que possible (docs/plan-marathon-trail-oct2026.md). C'est ce que fait cette route :
+// elle mesure sur le terrain plutôt que d'appliquer une formule.
+//
+// On ne renvoie QUE du mesuré. Les zones sont calculées côté app, à partir de la FC max
+// observée ici et de la FC repos saisie dans « état du jour ».
+
+async function handleProfil(request, env) {
+  if (env.APP_SECRET && request.headers.get('x-app-secret') !== env.APP_SECRET)
+    return json({ error: 'unauthorized' }, 401)
+
+  const force = new URL(request.url).searchParams.get('force') === '1'
+  const cacheKey = 'profil:v1'
+  if (!force) {
+    const cached = await env.TOKENS.get(cacheKey)
+    if (cached) return json({ ...JSON.parse(cached), cached: true })
+  }
+
+  const token = await getAccessToken(env)
+  if (!token) return json({ error: 'not_connected' }, 409)
+
+  const days = 120
+  const after = Math.floor(Date.now() / 1000) - days * 86400
+  const acts = await allActivities(token, after)
+  const runs = acts.filter((a) => RUN_TYPES.includes(a.sport_type) && a.distance > 2000)
+
+  const profil = buildProfil(runs, days)
+  // 12 h : le profil bouge lentement, inutile de rappeler Strava à chaque ouverture.
+  await env.TOKENS.put(cacheKey, JSON.stringify(profil), { expirationTtl: 60 * 60 * 12 })
+  return json({ ...profil, cached: false })
+}
+
+async function allActivities(token, after) {
+  const out = []
+  for (let page = 1; page <= 4; page++) {
+    const res = await fetch(
+      `https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=100&page=${page}`,
+      { headers: { authorization: `Bearer ${token}` } }
+    )
+    if (!res.ok) break
+    const batch = await res.json()
+    out.push(...batch)
+    if (batch.length < 100) break
+  }
+  return out
+}
+
+function buildProfil(runs, days) {
+  const hrRuns = runs.filter((a) => a.max_heartrate > 0)
+  const maxes = hrRuns.map((a) => a.max_heartrate).sort((x, y) => y - x)
+
+  // FC max « observée » : le pic brut d'un cardio optique au poignet peut être un artefact
+  // (accrochage sur la cadence). Avec assez de séances, on retient le 2e pic : un vrai max
+  // se confirme, un artefact isolé non.
+  const hrMax = maxes.length >= 5 ? maxes[1] : maxes[0] ?? null
+
+  // Le plan est 100 % easy en course : l'allure médiane des sorties EST l'allure easy réelle.
+  const paces = runs
+    .filter((a) => a.moving_time > 0 && a.distance > 0)
+    .map((a) => (a.moving_time / a.distance) * 1000)
+  const easyPaceSec = median(paces)
+  const easyHr = median(runs.filter((a) => a.average_heartrate > 0).map((a) => a.average_heartrate))
+
+  const recent = runs.filter((a) => sinceDays(a.start_date_local) <= 28)
+  const weeklyKm = recent.length ? sum(recent.map((a) => a.distance)) / 1000 / 4 : null
+
+  return {
+    since: new Date(Date.now() - days * 86400_000).toISOString().slice(0, 10),
+    runs: runs.length,
+    runsAvecFc: hrRuns.length,
+    hrMax,
+    hrTop: maxes.slice(0, 3),
+    easyPaceSec: easyPaceSec != null ? Math.round(easyPaceSec) : null,
+    easyHrMedian: easyHr != null ? Math.round(easyHr) : null,
+    weeklyKm: weeklyKm != null ? +weeklyKm.toFixed(1) : null,
+    longestKm: runs.length ? +(Math.max(...runs.map((a) => a.distance)) / 1000).toFixed(1) : null,
+    longestElevM: runs.length ? Math.round(Math.max(...runs.map((a) => a.total_elevation_gain || 0))) : null
+  }
+}
+
+function median(xs) {
+  if (!xs.length) return null
+  const s = [...xs].sort((a, b) => a - b)
+  const m = Math.floor(s.length / 2)
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+const sum = (xs) => xs.reduce((a, b) => a + b, 0)
+const sinceDays = (iso) => (Date.now() - new Date(iso).getTime()) / 86400_000
+
 // ---- Chat (parler au coach) ----
 
 async function handleChat(request, env) {
@@ -337,6 +429,8 @@ Quand tu appelles l'outil, ton texte reste une phrase ou deux qui expliquent le 
 Si la charge du jour change nettement (séance annulée, allégée, alourdie), renseigne AUSSI calories + noteNutrition : sinon l'app afficherait l'apport prévu pour la séance d'origine, ce qui serait faux. \
 Le contexte te donne le plan DÉJÀ adapté : si une journée porte "adapted", elle a déjà été modifiée, n'en propose pas une copie. \
 \
+SES CHIFFRES — le contexte contient un "profil" mesuré sur ses vraies sorties Strava : FC max observée, FC repos, zones FC recalibrées, allure easy médiane, volume hebdo. Ce sont exactement les chiffres AFFICHÉS dans son app, sur chaque séance : raisonne et parle avec CEUX-LÀ. Ne recalcule jamais ses zones de tête, n'utilise pas 220-âge, ne cite pas une FC cible qui contredirait ses zones. Profil absent : dis-le, n'invente pas de repère. \
+\
 STYLE : français, tutoiement, ton direct, chaleureux, honnête — jamais complaisant. Réponse COURTE : 2 à 5 phrases, ~80 mots max, en conversation naturelle (pas de titres, pas de structure markdown lourde, **gras** seulement pour un chiffre ou une consigne clé). Pas de disclaimer générique, pas de "en tant que coach". Va droit au but. Si une info te manque pour bien répondre (où exactement, depuis quand, à l'effort ou au repos), pose UNE question précise.`
 
 // ---- Claude (le coach) ----
@@ -346,6 +440,7 @@ Ton athlète prépare un marathon trail 42K/900 D+ avec objectif sub-4h. Tu déb
 IMPORTANT : il peut y avoir DEUX séances le même jour (muscu ET course) — dans ce cas, débriefe LES DEUX. \
 Pour la muscu, les charges/séries sont dans le champ description de l'activité (export Hevy) : exploite-les. \
 Principes du plan : course 100% easy (>5:01/km, allure conversation) ; power hiking en montée avec FC <150 bpm ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
+Le contexte contient un "profil" mesuré sur ses vraies sorties Strava (FC max observée, FC repos, zones FC recalibrées, allure easy médiane) : ce sont les cibles affichées sur sa séance. Juge le réalisé par rapport à CES zones — « FC trop haute » ne se dit que si c'est vrai au regard de SES zones, pas d'une intuition ni d'un 220-âge. \
 Si le contexte contient un "etatDuJour" (sommeil bien/moyen/mauvais, fatigue 1-5, FC repos en bpm), PONDÈRE tes conseils selon la récup : FC repos élevée vs d'habitude, sommeil mauvais ou fatigue ≥4 → recommande d'alléger / prioriser la récup ; bon état → tu peux pousser normalement. \
 Écris en français, tutoiement, ton direct et motivant mais honnête, concret et chiffré. Structure courte en markdown : \
 une ligne **Bilan** (verdict global de la journée), puis **Ce qui va** (2-4 puces), **À surveiller** (1-3 puces si pertinent), **Pour la suite** (1-2 conseils actionnables). \

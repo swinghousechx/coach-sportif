@@ -10,7 +10,7 @@
 
 - **Base = ton niveau réel**, pas celui d'un plan générique. Tu tournes déjà à ~35-40 km/semaine avec un plus long run à 12.6 km. On démarre de là, pas de zéro.
 - **Muscu 3x/semaine maintenue à fond** (ton choix) : le haut du corps continue de progresser en charge sur toute la durée. Le bas du corps passe en **maintenance** dès la semaine 4 (S4) — charges lourdes conservées, mais on arrête de monter en poids/volume.
-- **Repères allure/FC** : basés sur ton 5K estimé à 20'56 (Strava). Zones FC calculées par âge (indicatives) — fie-toi surtout aux allures et au ressenti (RPE).
+- **Repères allure/FC** : les zones FC ne sont plus calculées par âge. L'app les recalibre sur tes vraies sorties Strava (FC max observée + FC repos saisie → réserve cardiaque) et affiche les cibles chiffrées sur chaque séance — onglet Coach → « Mon profil ». Allures ci-dessous basées sur ton 5K estimé à 20'56 (Strava).
   - Z1-Z2 (easy) : plus lent que 5:01/km
   - Z3 (modéré/tempo doux) : 4:30-5:01/km
   - Z4 (seuil) : 4:13-4:30/km
@@ -82,4 +82,4 @@ Surplus actuel (350-450 kcal, 160g protéines) jusqu'à S4-5. Au-delà (volume c
 - Cumul gym-jambes + sortie longue/qualité le même jour → espacer.
 - FC en montée : rester < 150 bpm, power hike si ça dépasse.
 - Douleur articulaire sur les longues → ralentir la progression du long run.
-- Recalibration FC à faire dès que possible avant d'introduire du vrai seuil.
+- Recalibration FC : faite en continu par l'app depuis les données Strava (voir « Mon profil »). Un test de terrain reste utile avant d'introduire du vrai seuil, la FC max observée en easy sous-estimant souvent la vraie.
