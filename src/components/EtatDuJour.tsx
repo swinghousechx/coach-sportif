@@ -47,7 +47,18 @@ export default function EtatDuJour({ date }: { date: string }) {
       </div>
 
       {/* Sommeil */}
-      <Row label={etat.sleepHours != null ? `Sommeil · ${fmtDuree(etat.sleepHours)}` : 'Sommeil'}>
+      <Row
+        label={
+          <>
+            Sommeil
+            {etat.sleepHours != null && (
+              <span className="mt-0.5 block text-[11px] leading-none text-white/60">
+                {fmtDuree(etat.sleepHours)} mesurées
+              </span>
+            )}
+          </>
+        }
+      >
         <div className="flex gap-1.5">
           {(['bien', 'moyen', 'mauvais'] as const).map((v) => (
             <Chip key={v} active={etat.sommeil === v} onClick={() => update({ sommeil: v })}>
@@ -57,8 +68,17 @@ export default function EtatDuJour({ date }: { date: string }) {
         </div>
       </Row>
 
-      {/* Fatigue 1→5 */}
-      <Row label="Fatigue">
+      {/* Fatigue 1→5 — le sens de l'échelle doit être lisible sans le demander. */}
+      <Row
+        label={
+          <>
+            Fatigue
+            <span className="mt-0.5 block text-[11px] leading-none text-white/60">
+              1 frais → 5 cuit
+            </span>
+          </>
+        }
+      >
         <div className="flex gap-1.5">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -119,7 +139,7 @@ function fmtDuree(h: number): string {
   return `${Math.floor(t / 60)} h ${String(t % 60).padStart(2, '0')}`
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="mb-2.5 flex items-center justify-between gap-3">
       <span className="text-[13px] text-white/60">{label}</span>
