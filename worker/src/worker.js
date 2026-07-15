@@ -30,6 +30,7 @@ export default {
         return cors(await handleChat(request, env), origin)
       if (url.pathname === '/briefing' && request.method === 'POST')
         return cors(await handleBriefing(request, env), origin)
+      if (url.pathname === '/etat') return cors(await handleEtat(request, env), origin)
       if (url.pathname === '/profil') return cors(await handleProfil(request, env), origin)
       return cors(json({ error: 'not_found' }, 404), origin)
     } catch (e) {
@@ -383,6 +384,55 @@ SI RIEN NE CLOCHE, DIS-LE EN UNE PHRASE. Un bon coach ne fabrique pas une consig
 Si l'état du jour ou la charge le justifient, utilise l'outil "adapter_le_programme" — dans les deux sens : alléger s'il est cuit, mais aussi restaurer une séance allégée ou rattraper une séance sautée s'il est frais et que la charge le permet. L'athlète verra ta proposition et choisira. Attention : monter est borné. La progression du plan est déjà calculée (périodisation, règle des ~10 %, deload) et le protège de ses bons jours — jamais de volume en plus, jamais de longue rallongée, jamais de deload sabordé. En top forme, "déroule, garde-en sous le pied" est souvent la bonne réponse. Si quelque chose mérite d'être suivi dans le temps, note-le au carnet — mais sois avare, souvent il n'y a rien à noter. \
 \
 STYLE : français, tutoiement, direct, chaleureux, honnête — jamais complaisant. TRÈS COURT : 2 à 4 phrases, ~70 mots maximum. Pas de titres, pas de listes, pas de structure markdown lourde ; **gras** seulement sur un chiffre ou une consigne clé. Pas d'intro générique, pas de « en tant que coach ». Va droit au but.`
+
+// ---- État du jour, poussé depuis Apple Santé ----
+//
+// Garmin écrit FC de repos et sommeil dans Apple Santé (vérifié : Réglages → Santé →
+// Sources). Un raccourci iOS lit ces échantillons chaque matin et les POSTe ici.
+//
+// C'est le seul chemin propre vers les données Garmin : l'API Health officielle est
+// fermée derrière une validation réservée aux entreprises, et les bibliothèques
+// officieuses exigent le mot de passe Garmin (CGU violées, compte exposé). Ici, aucun
+// identifiant ne circule : la donnée passe d'un appareil de l'athlète à son worker.
+//
+// Ne stocke QUE de l'objectif mesuré. La fatigue reste subjective, donc saisie à la main.
+
+async function handleEtat(request, env) {
+  if (env.APP_SECRET && request.headers.get('x-app-secret') !== env.APP_SECRET)
+    return json({ error: 'unauthorized' }, 401)
+
+  const url = new URL(request.url)
+
+  if (request.method === 'GET') {
+    const date = url.searchParams.get('date')
+    if (!date) return json({ error: 'bad_request' }, 400)
+    const raw = await env.TOKENS.get(`etat:${date}`)
+    return json(raw ? JSON.parse(raw) : {})
+  }
+
+  if (request.method !== 'POST') return json({ error: 'not_found' }, 404)
+
+  const body = await request.json().catch(() => ({}))
+  const date = String(body.date || '').slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json({ error: 'date_invalide' }, 400)
+
+  // Un raccourci qui rate son coup envoie 0, "", ou une valeur absurde : on refuse
+  // plutôt que d'empoisonner le raisonnement du coach avec une FC de repos à 0.
+  const hrRest = num(body.hrRest, 25, 120)
+  const sleepHours = num(body.sleepHours, 0.5, 16)
+  if (hrRest == null && sleepHours == null)
+    return json({ error: 'aucune_valeur_exploitable', recu: body }, 400)
+
+  const etat = { date, hrRest, sleepHours, source: 'apple-sante', at: new Date().toISOString() }
+  await env.TOKENS.put(`etat:${date}`, JSON.stringify(etat), { expirationTtl: 60 * 60 * 24 * 120 })
+  return json({ ok: true, ...etat })
+}
+
+function num(v, min, max) {
+  const n = typeof v === 'string' ? parseFloat(v.replace(',', '.')) : v
+  if (typeof n !== 'number' || !Number.isFinite(n) || n < min || n > max) return undefined
+  return Math.round(n * 10) / 10
+}
 
 // ---- Profil physiologique (dérivé des vraies séances Strava) ----
 //

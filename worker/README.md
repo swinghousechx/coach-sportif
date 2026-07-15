@@ -96,8 +96,10 @@ Une fois déployée, l'app affiche :
 ## Comment ça marche
 
 - `GET /auth` → autorisation Strava · `GET /callback` → stocke les tokens (KV) · `GET /status` →
-  état de connexion · `POST /debrief` → récupère ta séance du jour, la compare au prévu, et renvoie
-  le débrief rédigé par Claude · `POST /chat` → conversation avec le coach.
+  état de connexion · `GET /profil` → profil mesuré (zones FC, allures, force) · `GET|POST /etat` →
+  FC de repos et sommeil poussés depuis Apple Santé.
+- Les trois temps du coach : `POST /briefing` (avant la séance) · `POST /chat` (pendant) ·
+  `POST /debrief` (après).
 - Les tokens Strava se **rafraîchissent** tout seuls. Chaque débrief est **mis en cache par date**
   (régénérable) pour ne pas repayer l'IA à chaque tap.
 - `/chat` n'est **pas** mis en cache (chaque message est une vraie question). Le worker y ajoute
@@ -118,3 +120,46 @@ Une fois déployée, l'app affiche :
 ```bash
 wrangler dev   # teste le worker en local sur http://localhost:8787
 ```
+
+## État du jour depuis Apple Santé (raccourci iOS)
+
+Garmin Connect écrit **FC de repos** et **Sommeil** dans Apple Santé (Réglages → Santé →
+Sources de données → Connect). Un raccourci iOS les lit chaque matin et les POSTe sur
+`/etat`. Aucun identifiant Garmin ne circule.
+
+Pourquoi ce détour : l'API Health officielle de Garmin est fermée derrière une validation
+réservée aux entreprises, et les bibliothèques officieuses exigent le mot de passe Garmin
+(CGU violées, compte exposé). Apple Santé est le seul pont propre. Garmin n'y écrit pas la
+HRV : inutile de la chercher.
+
+### La recette
+
+**App Raccourcis → Automatisation → Nouvelle → Heure de la journée → 7 h 00 → Exécuter
+immédiatement** (décocher « Demander avant d'exécuter »).
+
+Actions, dans l'ordre :
+
+1. **Rechercher des échantillons de santé où** — Type : `Fréquence cardiaque au repos` ·
+   Trier par `Date de début` · `Décroissant` · Limite `1`
+2. **Obtenir la valeur de** [échantillons de santé] → renommer la variable en `FC`
+3. **Obtenir le contenu de** `https://coach-strava.spochat.workers.dev/etat`
+   - Méthode : `POST`
+   - En-têtes : `x-app-secret` = *(ton APP_SECRET)* · `Content-Type` = `application/json`
+   - Corps de la requête : `JSON`
+     - `date` (Texte) → `Date actuelle` formatée `yyyy-MM-dd`
+     - `hrRest` (Nombre) → variable `FC`
+
+Le sommeil se rajoute en option : mêmes actions avec le type `Analyse du sommeil`, puis
+somme des durées des échantillons « endormi » de la nuit, envoyée en `sleepHours` (heures
+décimales). C'est nettement plus laborieux dans Raccourcis — la FC de repos porte
+l'essentiel du signal de récup, commence par elle.
+
+### Garde-fous
+
+- `hrRest` n'est accepté qu'entre **25 et 120**, `sleepHours` entre **0,5 et 16**. Un
+  raccourci qui rate son coup envoie `0` ou une chaîne vide : la route répond **400** et
+  ne stocke rien, plutôt que d'empoisonner le raisonnement du coach.
+- La date doit être **ISO** (`2026-07-15`). Le format français est refusé.
+- Stockage KV par date, TTL 120 jours.
+- Dans l'app, le mesuré **pré-remplit** et la saisie manuelle **gagne toujours** : une
+  valeur corrigée à la main n'est jamais réécrasée.

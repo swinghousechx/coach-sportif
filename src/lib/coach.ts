@@ -399,9 +399,29 @@ function frDate(iso: string): string {
 // ---- État du jour (récup subjective + FC repos), par date ----
 
 export interface DailyState {
-  sommeil?: 'bien' | 'moyen' | 'mauvais'
-  fatigue?: number // 1 (frais) → 5 (cuit)
-  hrRest?: number // FC repos (bpm), depuis la Garmin
+  sommeil?: 'bien' | 'moyen' | 'mauvais' // ressenti — subjectif, jamais automatisable
+  fatigue?: number // 1 (frais) → 5 (cuit), subjectif aussi
+  hrRest?: number // FC repos (bpm)
+  sleepHours?: number // durée mesurée, distincte du ressenti
+  /** 'auto' = poussé depuis Apple Santé par le raccourci ; sinon saisi à la main. */
+  hrRestSource?: 'auto'
+}
+
+/** FC de repos + sommeil mesurés, poussés par le raccourci iOS (voir worker /etat). */
+export async function fetchEtatAuto(
+  date: string
+): Promise<{ hrRest?: number; sleepHours?: number } | null> {
+  if (!API) return null
+  try {
+    const r = await fetch(`${API}/etat?date=${date}`, {
+      headers: { ...(SECRET ? { 'x-app-secret': SECRET } : {}) }
+    })
+    if (!r.ok) return null
+    const d = await r.json()
+    return d?.hrRest != null || d?.sleepHours != null ? d : null
+  } catch {
+    return null
+  }
 }
 
 const ETAT_KEY = 'coach:etat'
