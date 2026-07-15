@@ -3,7 +3,7 @@ import { phaseTone } from '../lib/dayMeta'
 import { weekRange } from '../lib/week'
 import Icon from './Icon'
 import WeekStrip from './WeekStrip'
-import { BigNumber, TileLabel } from './ui'
+import { BigNumber, Mesh, TileLabel } from './ui'
 
 interface Props {
   week: Week
@@ -18,7 +18,12 @@ export default function WeekHeader({ week, totalWeeks, isDone, todayDate, onJump
   const isRaceWeek = week.longRunKm == null
 
   return (
-    <header className="glass mb-4 overflow-hidden p-5">
+    <Mesh
+      accent={isRaceWeek ? 'run' : 'gym'}
+      intensity={0.5}
+      blur={44}
+      className="mb-4 border border-white/[0.08] p-5"
+    >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <TileLabel>
@@ -68,6 +73,6 @@ export default function WeekHeader({ week, totalWeeks, isDone, todayDate, onJump
       </div>
 
       <WeekStrip days={week.days} isDone={isDone} todayDate={todayDate} onJump={onJump} />
-    </header>
+    </Mesh>
   )
 }

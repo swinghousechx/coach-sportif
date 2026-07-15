@@ -32,27 +32,45 @@ export const MESH: Record<'run' | 'gym' | 'neutral', string> = {
   ].join(',')
 }
 
-/** Surface en dégradé mesh + grain. Sert aux cartes héros. */
+/**
+ * Surface en dégradé mesh floutée + grain.
+ *
+ * Le dégradé est posé sur une couche à part, réellement floutée puis débordée
+ * (scale) : un blur laisse des bords délavés, l'agrandissement les pousse hors
+ * du cadre. C'est ce qui donne le flou « optique » plutôt que des aplats étalés.
+ */
 export function Mesh({
   accent = 'neutral',
   className = '',
+  intensity = 1,
+  blur = 34,
   children
 }: {
   accent?: 'run' | 'gym' | 'neutral'
   className?: string
+  /** 0 → 1 : dosage du dégradé, pour les surfaces qui doivent rester discrètes. */
+  intensity?: number
+  blur?: number
   children: ReactNode
 }) {
   return (
-    <div
-      className={`relative overflow-hidden rounded-[28px] ${className}`}
-      style={{ backgroundImage: MESH[accent] }}
-    >
+    <div className={`relative isolate overflow-hidden rounded-[28px] bg-ink ${className}`}>
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.16] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          backgroundImage: MESH[accent],
+          filter: `blur(${blur}px)`,
+          transform: 'scale(1.35)',
+          opacity: intensity
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.16] mix-blend-overlay"
         style={{ backgroundImage: GRAIN_URL }}
       />
-      <div className="relative">{children}</div>
+      {children}
     </div>
   )
 }

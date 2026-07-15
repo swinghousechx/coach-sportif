@@ -29,16 +29,31 @@
 
   body {
     @apply bg-ink text-white font-body antialiased;
-    /* Halo lumineux discret en haut, ambiance "night run". */
-    background-image:
-      radial-gradient(120% 60% at 50% -10%, rgba(252, 76, 2, 0.12), transparent 60%),
-      radial-gradient(90% 50% at 90% 5%, rgba(185, 255, 60, 0.06), transparent 55%);
-    background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ambiance : nappes de couleur hors focale derrière toute l'app.
+     Couche à part car un background-image ne se floute pas — et le flou est
+     justement ce qui fait la matière. Débordée (inset négatif) pour que le
+     blur ne délave pas les bords de l'écran. Fixe : elle ne défile pas. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -25%;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(38% 30% at 50% 8%, rgba(252, 76, 2, 0.5), transparent 70%),
+      radial-gradient(32% 26% at 88% 18%, rgba(255, 158, 60, 0.28), transparent 70%),
+      radial-gradient(34% 28% at 8% 30%, rgba(185, 255, 60, 0.16), transparent 70%),
+      radial-gradient(40% 34% at 70% 62%, rgba(110, 90, 190, 0.22), transparent 72%),
+      radial-gradient(36% 30% at 20% 88%, rgba(60, 110, 150, 0.18), transparent 72%);
+    filter: blur(70px) saturate(125%);
   }
 
   /* Safe areas iOS (notch / home indicator) */
   #root {
+    position: relative;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }

@@ -8,7 +8,7 @@ import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
 import CoachDebrief from './CoachDebrief'
 import Targets from './Targets'
-import { ArrowButton, IconBadge } from './ui'
+import { ArrowButton, IconBadge, MESH } from './ui'
 
 interface Props {
   day: Day
@@ -53,7 +53,7 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         y: { duration: 0.45, ease: EASE_EXPO, delay: index * 0.04 }
       }}
       className={[
-        'glass relative p-3.5',
+        'glass relative isolate p-3.5',
         isToday ? `bg-white/[0.07] ring-2 ${ACCENT_RING[accent]}` : '',
         isRace && !isToday ? 'ring-2 ring-run/50' : ''
       ].join(' ')}
@@ -63,6 +63,25 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           : undefined
       }
     >
+      {/* Le jour même se distingue par la matière — nappe floutée à l'accent du jour —
+          plutôt que par un simple anneau. Sous le contenu, jamais devant. */}
+      {(isToday || isRace) && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[28px]"
+        >
+          <span
+            className="absolute inset-0"
+            style={{
+              backgroundImage: MESH[isRace || accent === 'run' ? 'run' : accent === 'gym' ? 'gym' : 'neutral'],
+              filter: 'blur(38px)',
+              transform: 'scale(1.35)',
+              opacity: 0.55
+            }}
+          />
+        </span>
+      )}
+
       <span
         aria-hidden
         className={`absolute left-0 top-4 bottom-4 w-1 rounded-full ${
@@ -80,14 +99,23 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           aria-expanded={open}
           className="focus-ring min-w-0 flex-1 text-left"
         >
+          {/* Tout le contexte de la journée sur une ligne : jour, type, distance, statut. */}
           <p className="flex flex-wrap items-baseline gap-x-1.5 font-display text-[10.5px] font-semibold uppercase leading-none tracking-[0.12em]">
-            <span className="text-white/45">{day.label}</span>
+            <span className={isToday ? accentText : 'text-white/45'}>
+              {isToday ? "Aujourd'hui" : day.label}
+            </span>
             <span className="text-white/20">·</span>
             <span className={accentText}>{typeLabel(day.type)}</span>
             {headlineKm && (
               <>
                 <span className="text-white/20">·</span>
                 <span className={`${accentText} tabular-nums`}>{headlineKm} km</span>
+              </>
+            )}
+            {day.adapted && (
+              <>
+                <span className="text-white/20">·</span>
+                <span className="text-white/60">Adapté</span>
               </>
             )}
           </p>
@@ -101,11 +129,6 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           >
             {title}
           </h2>
-
-          <div className="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
-            {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
-            {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
-          </div>
         </button>
 
         <div className="flex shrink-0 items-center gap-1.5">
@@ -132,11 +155,10 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">
-          {!day.sessionName && day.description && showRunSummary && day.description !== title && (
-            <p className="mt-1 pl-2 text-[13px] leading-snug text-white/70">{day.description}</p>
-          )}
-          {day.type === 'rest_or_easy' && (
-            <p className="mt-1 pl-2 text-[13px] leading-snug text-white/70">{day.description}</p>
+          {/* La description n'est reprise que si elle apporte autre chose que le titre :
+              sans sessionName, le titre EST la description — l'afficher deux fois. */}
+          {day.description && day.description !== title && (showRunSummary || day.type === 'rest_or_easy') && (
+            <p className="mt-2 pl-2 text-[13px] leading-snug text-white/70">{day.description}</p>
           )}
 
           {/* Journée modifiée avec le coach : on dit pourquoi, et on peut revenir en arrière. */}
