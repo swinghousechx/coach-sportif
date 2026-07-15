@@ -88,7 +88,7 @@ export default function ChatCoach({ day, week, program, tomorrow, today, onApply
           <button
             type="button"
             onClick={reset}
-            className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/40 transition-colors hover:text-white/70"
+            className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/70"
           >
             Effacer
           </button>
@@ -155,7 +155,7 @@ export default function ChatCoach({ day, week, program, tomorrow, today, onApply
               type="button"
               onClick={() => send(s)}
               disabled={loading}
-              className="focus-ring rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[12px] text-white/60 transition-colors hover:text-white/90 disabled:opacity-50"
+              className="focus-ring min-h-[44px] rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[12px] text-white/60 transition-colors hover:text-white/90 disabled:opacity-50"
             >
               {s}
             </button>
@@ -182,7 +182,7 @@ export default function ChatCoach({ day, week, program, tomorrow, today, onApply
           }}
           rows={1}
           placeholder="Aujourd’hui j’ai mal au genou…"
-          className="focus-ring max-h-28 min-h-[42px] flex-1 resize-none rounded-2xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-[13.5px] leading-snug text-white placeholder:text-white/30"
+          className="focus-ring max-h-28 min-h-[42px] flex-1 resize-none rounded-2xl border border-white/15 bg-white/5 px-3.5 py-2.5 text-[13.5px] leading-snug text-white placeholder:text-white/60"
         />
         <button
           type="submit"
@@ -222,12 +222,12 @@ function Proposal({
     >
       <div className="mb-2 flex items-center gap-2">
         <Icon name="refresh" size={14} className="text-white/50" />
-        <span className="font-display text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/50">
+        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
           Modifier le programme
         </span>
       </div>
 
-      <p className="font-display text-[11px] font-semibold uppercase tracking-widest text-white/45">
+      <p className="font-display text-[11px] font-semibold uppercase tracking-widest text-white/60">
         {frLong(adaptation.date)} · {typeLabel(adaptation.type)}
       </p>
       <p className="mt-0.5 text-balance font-display text-[17px] font-semibold leading-tight text-white">
@@ -235,9 +235,9 @@ function Proposal({
       </p>
       <p className="mt-1 text-pretty text-[13px] leading-snug text-white/75">{adaptation.description}</p>
       {stats.length > 0 && (
-        <p className="mt-1.5 text-[12px] tabular-nums text-white/55">{stats.join(' · ')}</p>
+        <p className="mt-1.5 text-[12px] tabular-nums text-white/60">{stats.join(' · ')}</p>
       )}
-      <p className="mt-1.5 text-pretty text-[12px] leading-snug text-white/45">{adaptation.raison}</p>
+      <p className="mt-1.5 text-pretty text-[12.5px] leading-snug text-white/60">{adaptation.raison}</p>
 
       {decision === 'applied' ? (
         <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-emerald-300">
@@ -245,7 +245,7 @@ function Proposal({
           Appliqué à ton programme
         </p>
       ) : decision === 'ignored' ? (
-        <p className="mt-3 text-[12px] text-white/40">Proposition ignorée — ton plan n’a pas bougé.</p>
+        <p className="mt-3 text-[12px] text-white/60">Proposition ignorée — ton plan n’a pas bougé.</p>
       ) : (
         <div className="mt-3 flex gap-2">
           <button
@@ -258,7 +258,7 @@ function Proposal({
           <button
             type="button"
             onClick={() => onDecide('ignored')}
-            className="focus-ring rounded-full border border-white/15 px-3 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white/80"
+            className="focus-ring rounded-full border border-white/15 px-3 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/80"
           >
             Ignorer
           </button>

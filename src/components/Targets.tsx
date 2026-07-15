@@ -19,11 +19,11 @@ export default function Targets({ day, program }: { day: Day; program: Program }
     <div className="mt-3">
       <div className="mb-2 flex items-center gap-2 pl-1">
         <Icon name="target" size={14} className="text-white/45" />
-        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
           Cibles
         </span>
         {zones && (
-          <span className="ml-auto text-[10px] uppercase tracking-wide text-white/30">
+          <span className="ml-auto text-[11px] uppercase tracking-wide text-white/60">
             {zones.method === 'karvonen' ? 'réserve cardiaque' : '% FC max'}
           </span>
         )}
@@ -41,7 +41,7 @@ export default function Targets({ day, program }: { day: Day; program: Program }
                 {t.value}
               </p>
               {t.hint && (
-                <p className="mt-1.5 text-pretty text-[11px] leading-snug text-white/40">{t.hint}</p>
+                <p className="mt-1.5 text-pretty text-[12.5px] leading-snug text-white/60">{t.hint}</p>
               )}
             </li>
           </Tile>
@@ -49,7 +49,7 @@ export default function Targets({ day, program }: { day: Day; program: Program }
       </ul>
 
       {!zones && (
-        <p className="mt-2 pl-1 text-[11px] leading-snug text-white/35">
+        <p className="mt-2 pl-1 text-[12.5px] leading-snug text-white/60">
           Cibles FC indisponibles : connecte Strava et synchronise ton profil dans l’onglet Coach.
         </p>
       )}

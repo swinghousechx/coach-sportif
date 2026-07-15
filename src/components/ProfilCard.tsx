@@ -49,7 +49,7 @@ export default function ProfilCard() {
           type="button"
           onClick={() => run(true)}
           disabled={loading}
-          className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/40 transition-colors hover:text-white/70 disabled:opacity-50"
+          className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/70 disabled:opacity-50"
         >
           {loading ? '…' : 'Recalculer'}
         </button>
@@ -58,7 +58,7 @@ export default function ProfilCard() {
       {error && <p className="text-[12px] text-amber-300">{error}</p>}
 
       {!profil && !error && (
-        <p className="text-[13px] leading-snug text-white/55">
+        <p className="text-[13px] leading-snug text-white/60">
           {loading ? 'Analyse de tes sorties…' : 'Profil non calculé.'}
         </p>
       )}
@@ -105,14 +105,14 @@ export default function ProfilCard() {
 
           {zones ? (
             <>
-              <p className="mb-1.5 mt-3.5 font-display text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/40">
+              <p className="mb-1.5 mt-3.5 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
                 Zones FC · {zones.method === 'karvonen' ? 'réserve cardiaque' : '% FC max'}
               </p>
               <ul className="flex flex-col gap-1">
                 {zones.zones.map((z) => (
                   <li key={z.key} className="flex items-baseline gap-2 text-[12.5px]">
                     <span className="w-6 shrink-0 font-display font-bold text-gym">{z.key}</span>
-                    <span className="w-20 shrink-0 text-white/50">{z.label}</span>
+                    <span className="w-20 shrink-0 text-white/60">{z.label}</span>
                     <span className="tabular-nums text-white/85">
                       {z.lo}–{z.hi} bpm
                     </span>
@@ -121,13 +121,13 @@ export default function ProfilCard() {
               </ul>
             </>
           ) : (
-            <p className="mt-3 text-[11.5px] leading-snug text-white/40">
+            <p className="mt-3 text-[12.5px] leading-snug text-white/60">
               Pas encore de FC max exploitable sur tes sorties — les zones apparaîtront dès qu’une
               séance remontera ta fréquence cardiaque.
             </p>
           )}
 
-          <p className="mt-3 text-pretty text-[11px] leading-snug text-white/35">
+          <p className="mt-3 text-pretty text-[12.5px] leading-snug text-white/60">
             Mesuré sur {profil.runs} sorties depuis le {frDate(profil.since)}
             {profil.runsAvecFc ? `, dont ${profil.runsAvecFc} avec cardio` : ''}.
             {!hrRest && ' Saisis ta FC repos ci-dessus : les zones passeront en réserve cardiaque, plus précises.'}

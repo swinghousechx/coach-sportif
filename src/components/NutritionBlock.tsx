@@ -11,7 +11,7 @@ export default function NutritionBlock({ nutrition }: { nutrition: Nutrition }) 
     <div className="mt-3">
       <div className="mb-2 flex items-center gap-2 pl-1">
         <Icon name="flame" size={14} className="text-run" />
-        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
           Nutrition
         </span>
       </div>
@@ -37,7 +37,7 @@ export default function NutritionBlock({ nutrition }: { nutrition: Nutrition }) 
         )}
       </div>
 
-      {note && <p className="mt-2 text-pretty pl-1 text-[12px] leading-snug text-white/55">{note}</p>}
+      {note && <p className="mt-2 text-pretty pl-1 text-[12px] leading-snug text-white/60">{note}</p>}
     </div>
   )
 }

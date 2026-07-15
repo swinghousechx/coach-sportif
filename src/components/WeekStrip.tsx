@@ -25,7 +25,7 @@ export default function WeekStrip({ days, isDone, todayDate, onJump }: Props) {
             onClick={() => onJump(i)}
             aria-label={`${d.label}${done ? ' (fait)' : ''}`}
             aria-current={isToday ? 'date' : undefined}
-            className="group flex flex-1 flex-col items-center gap-1.5 rounded-lg py-1 transition-transform duration-150 focus-ring active:scale-90"
+            className="group flex min-h-[44px] flex-1 flex-col items-center justify-end gap-1.5 rounded-lg py-1 transition-transform duration-150 focus-ring active:scale-90"
           >
             <span
               className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/12"
@@ -40,11 +40,13 @@ export default function WeekStrip({ days, isDone, todayDate, onJump }: Props) {
                 }}
               />
             </span>
+            {/* Le jour courant est déjà porté par l'anneau, le halo et aria-current :
+                son libellé passe en blanc plein plutôt qu'en accent — l'accent « repos »
+                est un ton de graphique (3:1), illisible en texte. */}
             <span
-              className={`font-display text-[10px] font-semibold uppercase tracking-wider transition-colors duration-200 ${
-                isToday ? '' : 'text-white/45 group-hover:text-white/70'
+              className={`font-display text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200 ${
+                isToday ? 'text-white' : 'text-white/60 group-hover:text-white/80'
               }`}
-              style={isToday ? { color: accent } : undefined}
             >
               {d.label.slice(0, 3)}
             </span>

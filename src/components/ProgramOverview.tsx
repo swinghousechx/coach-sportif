@@ -60,7 +60,7 @@ function WeekRow({
         className="focus-ring flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.04]"
       >
         <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-white/8">
-          <span className="font-display text-[9px] font-semibold uppercase tracking-wider text-white/40">
+          <span className="font-display text-[9px] font-semibold uppercase tracking-wider text-white/60">
             Sem
           </span>
           <span className="font-display text-lg font-bold leading-none tabular-nums text-white">
@@ -85,13 +85,13 @@ function WeekRow({
           </p>
         </div>
 
-        <span className="shrink-0 font-display text-xs font-semibold tabular-nums text-white/45">
+        <span className="shrink-0 font-display text-xs font-semibold tabular-nums text-white/60">
           {doneCount}/{week.days.length}
         </span>
         <Icon
           name="chevron"
           size={18}
-          className="shrink-0 text-white/40 transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
+          className="shrink-0 text-white/60 transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
           style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </button>
@@ -122,13 +122,13 @@ function DayRow({ day, done }: { day: Day; done: boolean }) {
   return (
     <li className="flex items-center gap-3 py-2">
       <Icon name={typeIcon(day.type)} size={16} className={`shrink-0 ${ACCENT_TEXT[accent]}`} />
-      <span className="w-9 shrink-0 font-display text-[11px] font-semibold uppercase tracking-wide text-white/45">
+      <span className="w-9 shrink-0 font-display text-[11px] font-semibold uppercase tracking-wide text-white/60">
         {day.label.slice(0, 3)}
       </span>
-      <span className={`min-w-0 flex-1 truncate text-[13px] ${done ? 'text-white/45 line-through' : 'text-white/85'}`}>
+      <span className={`min-w-0 flex-1 truncate text-[13px] ${done ? 'text-white/60 line-through' : 'text-white/85'}`}>
         {title}
       </span>
-      {dist && <span className="shrink-0 text-[12px] font-medium tabular-nums text-white/55">{dist}</span>}
+      {dist && <span className="shrink-0 text-[12px] font-medium tabular-nums text-white/60">{dist}</span>}
       {done && <span aria-label="fait" className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />}
     </li>
   )

@@ -145,9 +145,9 @@ export function ArrowButton({
       onClick={onClick}
       aria-label={label}
       aria-expanded={expanded}
-      className={`focus-ring inline-flex shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
+      className={`focus-ring relative inline-flex shrink-0 items-center justify-center rounded-full transition active:scale-90 ${
         tone === 'light' ? 'bg-white text-ink' : 'bg-ink text-white'
-      }`}
+      } ${size < 44 ? TAP_44 : ''}`}
       style={{ width: size, height: size }}
     >
       <svg
@@ -190,7 +190,8 @@ export function BigNumber({
   const sizes = { sm: 'text-[26px]', md: 'text-[38px]', lg: 'text-[52px]' }
   const units = { sm: 'text-[13px]', md: 'text-[16px]', lg: 'text-[20px]' }
   const tones = { white: 'text-white', run: 'text-run', gym: 'text-gym', ink: 'text-ink' }
-  const muted = tone === 'ink' ? 'text-ink/40' : 'text-white/40'
+  // L'unité est discrète, jamais illisible : /60 est le plancher du texte (7:1).
+  const muted = tone === 'ink' ? 'text-ink/60' : 'text-white/60'
 
   return (
     <p className={`flex items-baseline font-display font-bold leading-none tracking-tight ${tones[tone]}`}>
@@ -206,13 +207,21 @@ export function TileLabel({ children, tone = 'muted' }: { children: ReactNode; t
   return (
     <span
       className={`font-display text-[12px] font-semibold uppercase leading-tight tracking-[0.1em] ${
-        tone === 'ink' ? 'text-ink/70' : 'text-white/60'
+        tone === 'ink' ? 'text-ink/70' : 'text-white/70'
       }`}
     >
       {children}
     </span>
   )
 }
+
+/**
+ * Zone tactile de 44 px autour d'un contrôle plus petit visuellement.
+ * Le pouce vise 44 px (PRODUCT.md), l'œil voit 34 : on agrandit la cible sans
+ * grossir le dessin. À poser sur un parent `relative`.
+ */
+export const TAP_44 =
+  "after:absolute after:left-1/2 after:top-1/2 after:h-11 after:w-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-['']"
 
 /**
  * Mini-viz tracée à main levée, comme les sparklines de la référence.
@@ -222,7 +231,7 @@ export function TileLabel({ children, tone = 'muted' }: { children: ReactNode; t
 export function Sparkline({
   data,
   kind = 'line',
-  className = 'text-white/35',
+  className = 'text-white/60',
   width = 64,
   height = 26
 }: {

@@ -19,7 +19,7 @@ function VerifyButton() {
       href={STRAVA_LOG}
       target="_blank"
       rel="noopener noreferrer"
-      className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
+      className="focus-ring mt-3 inline-flex items-center gap-2 rounded-full border border-run/25 bg-run/10 px-3.5 min-h-[44px] py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-run transition-colors hover:bg-run/15"
     >
       <StravaMark />
       Vérifier sur Strava
@@ -71,7 +71,7 @@ function WeightSynced({ s }: { s: StravaSummary }) {
     <SyncedShell s={s}>
       {ex.length > 0 ? (
         <>
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-white/45">Réalisé</div>
+          <div className="mb-1 text-[11px] font-medium uppercase tracking-wide text-white/60">Réalisé</div>
           <ul className="divide-y divide-white/5">
             {ex.map((e, i) => (
               <li key={i} className="flex items-baseline justify-between gap-3 py-1.5">
@@ -80,7 +80,7 @@ function WeightSynced({ s }: { s: StravaSummary }) {
                   {e.topWeight && (
                     <span className="font-display text-sm font-bold tabular-nums text-run">{e.topWeight}</span>
                   )}
-                  {e.reps && <span className="ml-2 text-[11px] tabular-nums text-white/45">{e.reps}</span>}
+                  {e.reps && <span className="ml-2 text-[11px] tabular-nums text-white/60">{e.reps}</span>}
                 </span>
               </li>
             ))}
@@ -97,7 +97,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="font-display text-sm font-bold tabular-nums text-white">{value}</div>
-      <div className="text-[10px] font-medium uppercase tracking-wide text-white/45">{label}</div>
+      <div className="text-[10px] font-medium uppercase tracking-wide text-white/60">{label}</div>
     </div>
   )
 }

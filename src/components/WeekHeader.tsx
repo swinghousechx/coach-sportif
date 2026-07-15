@@ -38,7 +38,7 @@ export default function WeekHeader({ week, totalWeeks, isDone, todayDate, onJump
         {/* Séances cochées : la métrique de la semaine, traitée comme une donnée. */}
         <div className="shrink-0 text-right">
           <BigNumber value={doneCount} unit={`/${week.days.length}`} size="md" />
-          <p className="mt-1 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <p className="mt-1 font-display text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
             séances
           </p>
         </div>

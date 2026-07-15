@@ -55,7 +55,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
           type="button"
           onClick={() => run(false)}
           disabled={loading}
-          className="focus-ring inline-flex items-center gap-2 rounded-full bg-gym px-3.5 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-ink transition active:scale-[0.98] disabled:opacity-60"
+          className="focus-ring inline-flex min-h-[44px] items-center gap-2 rounded-full bg-gym px-4 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-ink transition active:scale-[0.98] disabled:opacity-60"
         >
           {loading ? (
             <>
@@ -103,7 +103,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
           type="button"
           onClick={() => run(true)}
           disabled={loading}
-          className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/40 transition-colors hover:text-white/70 disabled:opacity-50"
+          className="focus-ring text-[11px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/70 disabled:opacity-50"
         >
           {loading ? '…' : 'Régénérer'}
         </button>
@@ -130,7 +130,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
               return (
                 <div key={i} className="mb-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-[12px] text-white/70">
                   {a.kind && (
-                    <span className={`font-display text-[10px] font-semibold uppercase tracking-wide ${a.kind === 'muscu' ? 'text-gym' : 'text-run'}`}>
+                    <span className={`font-display text-[11px] font-semibold uppercase tracking-wide ${a.kind === 'muscu' ? 'text-gym' : 'text-run'}`}>
                       {a.kind === 'muscu' ? 'Muscu' : 'Course'}
                     </span>
                   )}

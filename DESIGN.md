@@ -8,10 +8,18 @@ colors:
   success-emerald: "#34D399"
   warning-amber: "#FBBF24"
   error-rose: "#FCA5A5"
-  glass-surface: "#FFFFFF0D"
-  glass-border: "#FFFFFF1A"
+  glass-surface: "#FFFFFF0E"
+  glass-border: "#FFFFFF14"
   text-primary: "#FFFFFF"
-  text-muted: "#FFFFFFA6"
+  text-secondary: "#FFFFFFB3"
+  text-muted: "#FFFFFF99"
+  graphic-muted: "#FFFFFF66"
+  mesh-run-core: "#FC4C029E"
+  mesh-run-warm: "#FF9E3C57"
+  mesh-run-deep: "#785AB447"
+  mesh-gym-core: "#B9FF3C73"
+  mesh-gym-teal: "#5AC8A04D"
+  mesh-cool: "#3C6E964D"
 typography:
   display:
     fontFamily: "Oswald, 'Arial Narrow', system-ui, sans-serif"
@@ -41,7 +49,7 @@ typography:
     fontWeight: 700
     letterSpacing: "0.14em"
 rounded:
-  card: "24px"
+  card: "28px"
   inner: "16px"
   chip: "12px"
   pill: "9999px"
@@ -71,7 +79,23 @@ components:
     backgroundColor: "{colors.success-emerald}"
     textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
-    size: "44px"
+    size: "34px"
+    tapSize: "44px"
+  tile:
+    backgroundColor: "{colors.glass-surface}"
+    borderColor: "{colors.glass-border}"
+    rounded: "{rounded.card}"
+    padding: "14px"
+  icon-badge:
+    borderColor: "{colors.graphic-muted}"
+    rounded: "{rounded.pill}"
+    size: "28-44px"
+  arrow-button:
+    backgroundColor: "{colors.text-primary}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    size: "34px"
+    tapSize: "44px"
   button-update:
     backgroundColor: "{colors.glass-surface}"
     textColor: "{colors.text-primary}"
@@ -115,6 +139,27 @@ emoji dépareillés), et tout gris pâle « élégant » qui devient illisible d
 
 Palette drenched-dark : un near-black qui occupe 90 % de la surface, deux accents-signal saturés,
 et un vocabulaire sémantique réduit.
+
+### Rampe de texte — la règle qui prime sur le goût
+
+L'app se lit au pouce, dehors, en plein soleil. Le blanc transparent sur nos surfaces donne
+**/45 = 4,49:1 (échec), /50 = 5,24, /60 = 7,0**. D'où la rampe, non négociable :
+
+| Rôle | Valeur | Usage |
+|---|---|---|
+| `text-primary` | `text-white` | Titres, chiffres, données. |
+| `text-secondary` | `text-white/70` | Libellés de tuile, corps secondaire. |
+| `text-muted` | `text-white/60` | **Plancher absolu de tout texte** (7:1). |
+| `graphic-muted` | `text-white/40` | Icônes, séparateurs, barres — **jamais du texte** (3,8:1 ≥ 3:1). |
+
+Un ton en dessous de `/60` sur du texte est un bug, pas une nuance. Le « gris pâle élégant » est
+listé dans les anti-références du produit : il ne se rattrape pas en design system.
+
+### Mesh — les nappes floutées
+
+Les `mesh-*` ne sont jamais des aplats : ils vivent sur une couche à part, floutée (34–70 px) puis
+débordée (`scale(1.35)`) pour que le flou ne délave pas les bords. Ils portent l'ambiance, jamais
+de l'information — aucun texte ne dépend d'eux pour être lisible.
 
 ### Primary
 - **Dossard Orange** (#FC4C02) : l'accent course. Liseré des cartes course, badge « Course »,

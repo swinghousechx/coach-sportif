@@ -8,7 +8,7 @@ import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
 import CoachDebrief from './CoachDebrief'
 import Targets from './Targets'
-import { ArrowButton, IconBadge, MESH } from './ui'
+import { ArrowButton, IconBadge, MESH, TAP_44 } from './ui'
 
 interface Props {
   day: Day
@@ -97,24 +97,24 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="focus-ring min-w-0 flex-1 text-left"
+          className="focus-ring min-h-[44px] min-w-0 flex-1 py-0.5 text-left"
         >
           {/* Tout le contexte de la journée sur une ligne : jour, type, distance, statut. */}
-          <p className="flex flex-wrap items-baseline gap-x-1.5 font-display text-[10.5px] font-semibold uppercase leading-none tracking-[0.12em]">
-            <span className={isToday ? accentText : 'text-white/45'}>
+          <p className="flex flex-wrap items-baseline gap-x-1.5 font-display text-[11px] font-semibold uppercase leading-none tracking-[0.12em]">
+            <span className={isToday ? accentText : 'text-white/60'}>
               {isToday ? "Aujourd'hui" : day.label}
             </span>
-            <span className="text-white/20">·</span>
+            <span aria-hidden className="text-white/25">·</span>
             <span className={accentText}>{typeLabel(day.type)}</span>
             {headlineKm && (
               <>
-                <span className="text-white/20">·</span>
+                <span aria-hidden className="text-white/25">·</span>
                 <span className={`${accentText} tabular-nums`}>{headlineKm} km</span>
               </>
             )}
             {day.adapted && (
               <>
-                <span className="text-white/20">·</span>
+                <span aria-hidden className="text-white/25">·</span>
                 <span className="text-white/60">Adapté</span>
               </>
             )}
@@ -124,7 +124,7 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
             className={`mt-1.5 text-pretty font-display font-semibold leading-tight tracking-tight ${
               isRace ? 'text-[22px]' : 'text-[17px]'
             } ${open ? '' : 'line-clamp-2'} ${
-              done ? 'text-white/55 line-through decoration-white/35' : 'text-white'
+              done ? 'text-white/60 line-through decoration-white/35' : 'text-white'
             }`}
           >
             {title}
@@ -164,12 +164,12 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           {/* Journée modifiée avec le coach : on dit pourquoi, et on peut revenir en arrière. */}
           {day.adapted && (
             <div className="mt-2 flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
-              <p className="text-pretty text-[12px] leading-snug text-white/55">{day.adapted.raison}</p>
+              <p className="text-pretty text-[12px] leading-snug text-white/60">{day.adapted.raison}</p>
               {onRevert && (
                 <button
                   type="button"
                   onClick={onRevert}
-                  className="focus-ring shrink-0 text-[11px] font-semibold uppercase tracking-widest text-white/40 transition-colors hover:text-white/75"
+                  className="focus-ring shrink-0 text-[11px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/75"
                 >
                   Rétablir
                 </button>
@@ -186,7 +186,7 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
                   <span className="min-w-0">
                     <span className="block truncate text-[15px] text-white/90">{ex.name}</span>
                     {ex.note && (
-                      <span className="mt-0.5 block text-[11px] leading-snug text-white/45">
+                      <span className="mt-0.5 block text-[11px] leading-snug text-white/60">
                         {ex.note}
                       </span>
                     )}
@@ -288,9 +288,10 @@ function ToggleDone({
       aria-label={done ? `${label} : marquer comme non fait` : `${label} : marquer comme fait`}
       className={[
         'focus-ring relative flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200',
+        TAP_44, // le dessin fait 34, le pouce vise 44
         done
           ? 'border-emerald-400 bg-emerald-400 text-ink'
-          : 'border-white/25 bg-white/5 text-white/50 hover:border-white/50 hover:text-white/80'
+          : 'border-white/40 bg-white/5 text-white/60 hover:border-white/60 hover:text-white/90'
       ].join(' ')}
     >
       <AnimatePresence>

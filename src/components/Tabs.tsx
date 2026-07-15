@@ -25,8 +25,8 @@ export default function Tabs({ value, onChange }: Props) {
             aria-selected={active}
             onClick={() => onChange(t.key)}
             className={[
-              'focus-ring rounded-2xl px-2 py-2.5 font-display text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200',
-              active ? 'bg-white/12 text-white' : 'text-white/50 hover:text-white/75'
+              'focus-ring min-h-[44px] rounded-2xl px-2 py-2.5 font-display text-[13px] font-semibold uppercase tracking-widest transition-colors duration-200',
+              active ? 'bg-white/12 text-white' : 'text-white/60 hover:text-white/75'
             ].join(' ')}
           >
             {t.label}

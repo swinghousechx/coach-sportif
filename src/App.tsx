@@ -146,7 +146,7 @@ export default function App() {
             type="button"
             onClick={() => window.location.reload()}
             aria-label="Rafraîchir l'app"
-            className="focus-ring rounded-full p-2 text-white/45 transition hover:text-white/80 active:scale-90"
+            className="focus-ring rounded-full p-[13px] text-white/60 transition hover:text-white/80 active:scale-90"
           >
             <Icon name="refresh" size={18} />
           </button>
@@ -197,7 +197,7 @@ export default function App() {
 
         <div className="mt-6">
           <UpdateButton onLoaded={handleLoaded} />
-          <p className="mt-3 px-2 text-center text-[11px] leading-relaxed text-white/45">
+          <p className="mt-3 px-2 text-center text-[12px] leading-relaxed text-white/60">
             Plan marathon trail · course le 11 oct. 2026. Fonctionne hors-ligne une fois installé.
           </p>
         </div>

@@ -42,10 +42,10 @@ export default function EtatDuJour({ date }: { date: string }) {
               onClick={() => update({ fatigue: n })}
               aria-pressed={etat.fatigue === n}
               className={[
-                'focus-ring h-8 w-8 rounded-full border text-[13px] font-semibold tabular-nums transition-colors',
+                'focus-ring h-11 w-11 rounded-full border text-[13px] font-semibold tabular-nums transition-colors',
                 etat.fatigue === n
                   ? 'border-run bg-run/20 text-run'
-                  : 'border-white/15 bg-white/5 text-white/50 hover:text-white/80'
+                  : 'border-white/15 bg-white/5 text-white/60 hover:text-white/80'
               ].join(' ')}
             >
               {n}
@@ -65,13 +65,13 @@ export default function EtatDuJour({ date }: { date: string }) {
             value={etat.hrRest ?? ''}
             onChange={(e) => update({ hrRest: e.target.value ? Number(e.target.value) : undefined })}
             placeholder="—"
-            className="focus-ring w-16 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-center font-display text-base font-bold tabular-nums text-white placeholder:text-white/30"
+            className="focus-ring w-16 rounded-xl border border-white/15 bg-white/5 px-2.5 py-1.5 text-center font-display text-base font-bold tabular-nums text-white placeholder:text-white/60"
           />
-          <span className="text-[12px] text-white/40">bpm</span>
+          <span className="text-[12px] text-white/60">bpm</span>
         </div>
       </Row>
 
-      <p className="mt-1 text-[11px] leading-snug text-white/40">
+      <p className="mt-1 text-[11px] leading-snug text-white/60">
         La FC repos vient de ta Garmin (au réveil). Le coach en tient compte dans le débrief du jour.
       </p>
     </div>
@@ -102,8 +102,8 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'focus-ring rounded-full border px-3 py-1.5 text-[12px] font-semibold capitalize transition-colors',
-        active ? 'border-gym bg-gym/15 text-gym' : 'border-white/15 bg-white/5 text-white/50 hover:text-white/80'
+        'focus-ring min-h-[44px] rounded-full border px-3.5 py-1.5 text-[12px] font-semibold capitalize transition-colors',
+        active ? 'border-gym bg-gym/15 text-gym' : 'border-white/15 bg-white/5 text-white/60 hover:text-white/80'
       ].join(' ')}
     >
       {children}

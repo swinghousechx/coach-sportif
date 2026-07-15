@@ -101,7 +101,7 @@ export default function PullToRefresh({
       >
         <span
           className={`flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-xl ${
-            ready || refreshing ? 'border-gym/40 bg-gym/15 text-gym' : 'border-white/15 bg-white/10 text-white/50'
+            ready || refreshing ? 'border-gym/40 bg-gym/15 text-gym' : 'border-white/15 bg-white/10 text-white/60'
           }`}
         >
           <Icon

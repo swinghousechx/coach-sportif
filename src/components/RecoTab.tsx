@@ -151,7 +151,7 @@ function RecoCard({ reco, reduce, onRefresh }: { reco: Reco; reduce: boolean; on
       <button
         type="button"
         onClick={onRefresh}
-        className="focus-ring mx-auto mt-1 text-[12px] font-semibold uppercase tracking-widest text-white/45 transition-colors hover:text-white/70"
+        className="focus-ring mx-auto mt-1 text-[12px] font-semibold uppercase tracking-widest text-white/60 transition-colors hover:text-white/70"
       >
         Réinitialiser
       </button>

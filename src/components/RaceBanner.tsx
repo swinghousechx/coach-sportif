@@ -22,7 +22,7 @@ export default function RaceBanner({ race, raceDate }: Props) {
             <p className="font-display text-[15px] font-semibold uppercase tracking-[0.14em] text-white/85">
               {shortDate(raceDate)} 2026
             </p>
-            <p className="mt-1 text-[13px] text-white/55">
+            <p className="mt-1 text-[13px] text-white/60">
               {race.distanceKm} km · {race.elevationM} D+ · sub-{race.goalTime.replace(':00:00', 'h')}
             </p>
           </div>
@@ -36,7 +36,7 @@ export default function RaceBanner({ race, raceDate }: Props) {
               {cd}
             </p>
           )}
-          <p className="pb-1 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+          <p className="pb-1 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
             avant la course
           </p>
         </div>
