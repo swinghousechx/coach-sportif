@@ -1,43 +1,46 @@
 import type { RaceInfo } from '../types'
 import { countdownLabel, shortDate } from '../lib/week'
-import Icon from './Icon'
+import { BigNumber, IconBadge, Mesh } from './ui'
 
 interface Props {
   race: RaceInfo
   raceDate: string
 }
 
-// Bandeau course : compte à rebours + objectif. Toujours en haut.
+// Carte héros : le compte à rebours course. Dégradé mesh grainé, gros chiffre à
+// unité discrète — c'est l'objet le plus lourd visuellement de l'app, et le seul.
 export default function RaceBanner({ race, raceDate }: Props) {
-  const cd = countdownLabel(raceDate)
+  const cd = countdownLabel(raceDate) // « J-88 » | « Aujourd'hui »…
+  const days = /^J-(\d+)$/.exec(cd)?.[1]
+
   return (
-    <div className="glass mb-4 flex items-center gap-3.5 overflow-hidden p-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-run/25 bg-run/10">
-        <Icon name="flag" size={22} className="text-run" />
-      </div>
+    <Mesh accent="run" className="mb-4">
+      <div className="flex flex-col gap-6 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <IconBadge name="flag" tone="run" size={44} />
+          <div className="text-right">
+            <p className="font-display text-[15px] font-semibold uppercase tracking-[0.14em] text-white/85">
+              {shortDate(raceDate)} 2026
+            </p>
+            <p className="mt-1 text-[13px] text-white/55">
+              {race.distanceKm} km · {race.elevationM} D+ · sub-{race.goalTime.replace(':00:00', 'h')}
+            </p>
+          </div>
+        </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
-          <span className="font-display text-sm font-semibold uppercase tracking-widest text-white/55">
-            {shortDate(raceDate)} 2026
-          </span>
-        </div>
-        <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[13px] text-white/85">
-          <span className="font-semibold">
-            {race.distanceKm} km · {race.elevationM} D+
-          </span>
-          <span className="text-white/50">objectif sub-{race.goalTime.replace(':00:00', 'h')}</span>
-        </p>
-      </div>
-
-      <div className="shrink-0 text-right">
-        <div className="font-display text-2xl font-bold leading-none tracking-tight text-run tabular-nums">
-          {cd}
-        </div>
-        <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-white/40">
-          avant la course
+        <div className="flex items-end justify-between gap-3">
+          {days ? (
+            <BigNumber value={days} prefix="J−" size="lg" />
+          ) : (
+            <p className="font-display text-[40px] font-bold leading-none tracking-tight text-white">
+              {cd}
+            </p>
+          )}
+          <p className="pb-1 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+            avant la course
+          </p>
         </div>
       </div>
-    </div>
+    </Mesh>
   )
 }

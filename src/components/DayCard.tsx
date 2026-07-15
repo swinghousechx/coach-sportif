@@ -8,6 +8,7 @@ import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
 import CoachDebrief from './CoachDebrief'
 import Targets from './Targets'
+import { ArrowButton, BigNumber, IconBadge, TileLabel } from './ui'
 
 interface Props {
   day: Day
@@ -39,6 +40,8 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
   const isRunFamily = day.type === 'run' || day.type === 'long_run' || day.type === 'hike' || isRace
 
   const title = day.sessionName ?? day.description ?? typeLabel(day.type)
+  // Distance mise en avant quand la carte est repliée (sorties uniquement).
+  const headlineKm = isRunFamily ? day.distanceKm : undefined
 
   return (
     <motion.section
@@ -67,50 +70,59 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         }`}
       />
 
-      <div className="flex items-start justify-between gap-3 pl-2">
-        {/* L'en-tête entier plie/déplie la journée. */}
+      <div className="pl-2">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <IconBadge name={typeIcon(day.type)} size={38} tone={accent === 'rest' ? 'muted' : accent} />
+            <div className="min-w-0">
+              <TileLabel>{day.label}</TileLabel>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <span className={`badge ${ACCENT_BG[accent]} ${accentText}`}>{typeLabel(day.type)}</span>
+                {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
+                {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
+              </div>
+            </div>
+          </div>
+
+          <ArrowButton
+            onClick={() => setOpen((v) => !v)}
+            label={open ? `${title} : replier` : `${title} : déplier`}
+            expanded={open}
+            tone="light"
+            size={38}
+          />
+        </div>
+
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="focus-ring min-w-0 flex-1 text-left"
+          className="focus-ring w-full text-left"
         >
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            <span className={`badge ${ACCENT_BG[accent]} ${accentText} inline-flex items-center gap-1`}>
-              <Icon name={typeIcon(day.type)} size={12} />
-              {typeLabel(day.type)}
-            </span>
-            <span className="font-display text-sm font-semibold uppercase tracking-widest text-white/55">
-              {day.label}
-            </span>
-            {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
-            {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
-          </div>
-
-          <div className="flex items-start gap-2">
-            <Icon
-              name="chevron"
-              size={16}
-              className="mt-1 shrink-0 text-white/35 transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
-              style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-            />
-            <h2
-              className={`text-balance font-display font-semibold leading-tight tracking-tight ${
-                isRace ? 'text-2xl' : 'text-xl'
-              } ${done ? 'text-white/70 line-through decoration-white/40' : 'text-white'}`}
-            >
-              {title}
-            </h2>
-          </div>
-
-          {isRace && day.goalTime && (
-            <p className="mt-1 font-display text-sm font-semibold uppercase tracking-widest text-run">
-              Objectif {day.goalTime.replace(':00:00', 'h')}
-            </p>
-          )}
+          <h2
+            className={`text-balance font-display font-semibold leading-tight tracking-tight ${
+              isRace ? 'text-[28px]' : 'text-[22px]'
+            } ${done ? 'text-white/60 line-through decoration-white/40' : 'text-white'}`}
+          >
+            {title}
+          </h2>
         </button>
 
-        <ToggleDone done={done} onToggle={onToggle} label={title} />
+        {isRace && day.goalTime && (
+          <p className="mt-1 font-display text-sm font-semibold uppercase tracking-widest text-run">
+            Objectif {day.goalTime.replace(':00:00', 'h')}
+          </p>
+        )}
+
+        {/* Bas de tuile : la donnée qu'on lit d'un coup d'œil, et la coche. */}
+        <div className="mt-2.5 flex items-end justify-between gap-3">
+          {headlineKm ? (
+            <BigNumber value={headlineKm} unit="km" size="md" tone={accent === 'gym' ? 'gym' : 'run'} />
+          ) : (
+            <span />
+          )}
+          <ToggleDone done={done} onToggle={onToggle} label={title} />
+        </div>
       </div>
 
       {/* Corps repliable (grid-template-rows 0fr→1fr, comme le débrief). */}

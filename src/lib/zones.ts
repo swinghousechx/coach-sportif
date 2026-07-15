@@ -20,6 +20,7 @@ export interface Profil {
   easyPaceSec: number | null // allure médiane des sorties, en s/km
   easyHrMedian: number | null
   weeklyKm: number | null
+  weeklySeries?: number[] // km des 8 dernières semaines, de la plus ancienne à la plus récente
   longestKm: number | null
   longestElevM: number | null
   cached?: boolean

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { fetchProfil, loadProfil } from '../lib/coach'
-import { computeZones, fmtPace, medianHrRest, type Profil } from '../lib/zones'
+import { computeZones, fmtPace, medianHrRest, zone, type Profil } from '../lib/zones'
 import Icon from './Icon'
+import { BigNumber, IconBadge, Sparkline, Tile, TileLabel } from './ui'
 
 // Profil physiologique mesuré sur Strava → zones FC recalibrées.
 // Remplace les repères « par âge » du plan de départ, que le plan lui-même
@@ -33,6 +34,8 @@ export default function ProfilCard() {
 
   const hrRest = medianHrRest()
   const zones = profil?.hrMax ? computeZones(profil.hrMax, hrRest) : null
+  // Easy au-dessus de la Z2 = les sorties faciles sont courues trop vite : on le signale.
+  const aboveZ2 = !!(zones && profil?.easyHrMedian && profil.easyHrMedian > zone(zones, 'Z2').hi)
 
   return (
     <div className="glass p-4">
@@ -63,18 +66,41 @@ export default function ProfilCard() {
 
       {profil && (
         <>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
-            <Stat label="FC max observée" value={profil.hrMax ? `${profil.hrMax} bpm` : '—'} />
-            <Stat label="FC repos" value={hrRest ? `${hrRest} bpm` : '—'} />
+          <div className="grid grid-cols-2 gap-2">
+            <Stat icon="heart" label="FC max" value={profil.hrMax ?? '—'} unit={profil.hrMax ? 'bpm' : undefined} />
             <Stat
-              label="Easy médian"
-              value={profil.easyPaceSec ? `${fmtPace(profil.easyPaceSec)} /km` : '—'}
+              icon="moon"
+              label="FC repos"
+              value={hrRest ?? '—'}
+              unit={hrRest ? 'bpm' : undefined}
             />
-            <Stat label="FC easy" value={profil.easyHrMedian ? `${profil.easyHrMedian} bpm` : '—'} />
-            <Stat label="Volume" value={profil.weeklyKm != null ? `${profil.weeklyKm} km/sem` : '—'} />
             <Stat
+              icon="activity"
+              label="Easy médian"
+              value={profil.easyPaceSec ? fmtPace(profil.easyPaceSec) : '—'}
+              unit={profil.easyPaceSec ? '/km' : undefined}
+            />
+            <Stat
+              icon="heart"
+              label="FC easy"
+              value={profil.easyHrMedian ?? '—'}
+              unit={profil.easyHrMedian ? 'bpm' : undefined}
+              tone={aboveZ2 ? 'run' : 'white'}
+              alert={aboveZ2}
+            />
+            <Stat
+              icon="route"
+              label="Volume"
+              value={profil.weeklyKm ?? '—'}
+              unit={profil.weeklyKm != null ? 'km/sem' : undefined}
+              viz={profil.weeklySeries?.some((v) => v > 0) ? profil.weeklySeries : undefined}
+              vizKind="bars"
+            />
+            <Stat
+              icon="mountain"
               label="Plus longue"
-              value={profil.longestKm != null ? `${profil.longestKm} km` : '—'}
+              value={profil.longestKm ?? '—'}
+              unit={profil.longestKm != null ? 'km' : undefined}
             />
           </div>
 
@@ -113,14 +139,37 @@ export default function ProfilCard() {
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+// Tuile de métrique : pastille + libellé en haut, gros chiffre en bas, mini-viz à droite.
+function Stat({
+  icon,
+  label,
+  value,
+  unit,
+  tone = 'white',
+  alert,
+  viz,
+  vizKind = 'line'
+}: {
+  icon: 'heart' | 'moon' | 'activity' | 'route' | 'mountain'
+  label: string
+  value: string | number
+  unit?: string
+  tone?: 'white' | 'run' | 'gym'
+  alert?: boolean
+  viz?: number[]
+  vizKind?: 'line' | 'bars'
+}) {
   return (
-    <div>
-      <p className="text-[11px] uppercase tracking-wide text-white/40">{label}</p>
-      <p className="font-display text-[17px] font-bold tabular-nums tracking-tight text-white">
-        {value}
-      </p>
-    </div>
+    <Tile className="flex flex-col justify-between gap-3 p-3.5">
+      <div className="flex items-start gap-2">
+        <IconBadge name={icon} size={30} tone={alert ? 'run' : 'muted'} alert={alert} />
+        <TileLabel>{label}</TileLabel>
+      </div>
+      <div className="flex items-end justify-between gap-1">
+        <BigNumber value={value} unit={unit} size="sm" tone={tone} />
+        {viz && <Sparkline data={viz} kind={vizKind} width={38} height={18} className="text-white/25" />}
+      </div>
+    </Tile>
   )
 }
 

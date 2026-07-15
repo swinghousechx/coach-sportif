@@ -268,7 +268,20 @@ function buildProfil(runs, days) {
   const recent = runs.filter((a) => sinceDays(a.start_date_local) <= 28)
   const weeklyKm = recent.length ? sum(recent.map((a) => a.distance)) / 1000 / 4 : null
 
+  // Volume des 8 dernières semaines (de la plus ancienne à la plus récente) : une
+  // vraie tendance, pas une décoration — c'est ce que trace la sparkline « Volume ».
+  const weeklySeries = Array.from({ length: 8 }, (_, i) => {
+    const from = (8 - i) * 7
+    const to = (7 - i) * 7
+    const wk = runs.filter((a) => {
+      const d = sinceDays(a.start_date_local)
+      return d <= from && d > to
+    })
+    return +(sum(wk.map((a) => a.distance)) / 1000).toFixed(1)
+  })
+
   return {
+    weeklySeries,
     since: new Date(Date.now() - days * 86400_000).toISOString().slice(0, 10),
     runs: runs.length,
     runsAvecFc: hrRuns.length,
