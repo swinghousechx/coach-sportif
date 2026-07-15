@@ -35,7 +35,7 @@ export default function CoachDebrief({ day, week, program }: Props) {
       const msg = e instanceof Error ? e.message : 'erreur'
       setError(
         msg === 'not_connected'
-          ? 'Strava pas connecté — connecte-le dans l’onglet Reco.'
+          ? 'Strava pas connecté — connecte-le dans l’onglet Coach.'
           : 'Débrief indisponible, réessaie.'
       )
     } finally {

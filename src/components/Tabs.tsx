@@ -8,7 +8,8 @@ interface Props {
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'week', label: 'Semaine' },
   { key: 'plan', label: 'Programme' },
-  { key: 'reco', label: 'Reco' }
+  // La clé reste 'reco' : le retour OAuth Strava pointe sur #reco.
+  { key: 'reco', label: 'Coach' }
 ]
 
 // Segmented control en verre, dans le style existant.

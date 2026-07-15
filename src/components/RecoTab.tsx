@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import type { Program } from '../types'
 import { buildReco, type Reco } from '../lib/reco'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
+import ChatCoach from './ChatCoach'
 import EtatDuJour from './EtatDuJour'
 import Icon from './Icon'
 
@@ -54,6 +55,17 @@ export default function RecoTab({ program, todayDate }: Props) {
 
       {/* État du jour (récup subjective + FC repos → pris en compte par le coach) */}
       {isCoachEnabled() && <EtatDuJour date={todayDate} />}
+
+      {/* Conversation avec le coach (douleur, fatigue, adaptation de séance) */}
+      {isCoachEnabled() && resolved.entry && (
+        <ChatCoach
+          day={resolved.entry.day}
+          week={resolved.entry.week}
+          program={program}
+          tomorrow={resolved.tomorrow}
+          today={todayDate}
+        />
+      )}
 
       {/* Analyse à la demande */}
       {state !== 'done' ? (

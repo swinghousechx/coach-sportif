@@ -19,6 +19,8 @@ type Name =
   | 'moon'
   | 'protein'
   | 'refresh'
+  | 'message'
+  | 'send'
 
 const PATHS: Record<Name, JSX.Element> = {
   // Ligne de rythme cardio — la course / l'effort.
@@ -99,6 +101,15 @@ const PATHS: Record<Name, JSX.Element> = {
     <>
       <path d="M21 12a9 9 0 1 1-2.64-6.36" />
       <path d="M21 4v5h-5" />
+    </>
+  ),
+  // Parler au coach — bulle de conversation.
+  message: <path d="M21 11.5a8 8 0 0 1-8 8H8l-5 3 1.2-4.4A8 8 0 1 1 21 11.5Z" />,
+  // Envoyer — flèche montante.
+  send: (
+    <>
+      <path d="M12 20V5" />
+      <path d="M6 11l6-6 6 6" />
     </>
   )
 }

@@ -97,9 +97,12 @@ Une fois déployée, l'app affiche :
 
 - `GET /auth` → autorisation Strava · `GET /callback` → stocke les tokens (KV) · `GET /status` →
   état de connexion · `POST /debrief` → récupère ta séance du jour, la compare au prévu, et renvoie
-  le débrief rédigé par Claude.
+  le débrief rédigé par Claude · `POST /chat` → conversation avec le coach.
 - Les tokens Strava se **rafraîchissent** tout seuls. Chaque débrief est **mis en cache par date**
   (régénérable) pour ne pas repayer l'IA à chaque tap.
+- `/chat` n'est **pas** mis en cache (chaque message est une vraie question). Le worker y ajoute
+  tout seul tes **10 derniers jours d'activités Strava** ; l'app envoie la séance du jour, l'état du
+  jour et les 12 derniers messages — ce qui borne le coût à quelques centimes par message.
 
 ## Sécurité (à savoir)
 

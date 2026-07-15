@@ -3,7 +3,7 @@
 // récupère la/les séance(s) réelle(s) du jour et fait rédiger un débrief par Claude Opus 4.8.
 // Un jour peut contenir DEUX séances (muscu + course) → le débrief couvre les deux.
 //
-// Routes : GET /auth · GET /callback · GET /status · POST /debrief
+// Routes : GET /auth · GET /callback · GET /status · POST /debrief · POST /chat
 // Secrets : STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, ANTHROPIC_API_KEY, APP_SECRET
 // Bindings : TOKENS (KV) · vars APP_ORIGIN, APP_REDIRECT, EFFORT
 
@@ -25,6 +25,8 @@ export default {
       if (url.pathname === '/status') return cors(await handleStatus(env), origin)
       if (url.pathname === '/debrief' && request.method === 'POST')
         return cors(await handleDebrief(request, env), origin)
+      if (url.pathname === '/chat' && request.method === 'POST')
+        return cors(await handleChat(request, env), origin)
       return cors(json({ error: 'not_found' }, 404), origin)
     } catch (e) {
       return cors(json({ error: 'server_error', message: String(e?.message || e) }, 500), origin)
@@ -186,6 +188,86 @@ function fmtDuration(s) {
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   return h ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`
+}
+
+// ---- Chat (parler au coach) ----
+
+async function handleChat(request, env) {
+  if (env.APP_SECRET && request.headers.get('x-app-secret') !== env.APP_SECRET)
+    return json({ error: 'unauthorized' }, 401)
+
+  const body = await request.json().catch(() => ({}))
+  const { messages, context } = body
+  if (!Array.isArray(messages) || !messages.length) return json({ error: 'bad_request' }, 400)
+
+  // Le coach répond même sans Strava — l'historique réel n'est qu'un bonus.
+  const token = await getAccessToken(env)
+  const recent = token ? await recentActivities(token, 10) : []
+
+  const system =
+    CHAT_SYSTEM +
+    `\n\n--- CONTEXTE (données réelles, ne les invente pas) ---\n` +
+    `PLAN & JOUR :\n${JSON.stringify(context || {})}\n\n` +
+    (recent.length
+      ? `10 DERNIERS JOURS SUR STRAVA :\n${JSON.stringify(recent)}`
+      : `STRAVA : aucune activité récente disponible.`)
+
+  const reply = await callClaudeChat(env, system, messages.slice(-12))
+  return json({ reply })
+}
+
+// Résumé compact des activités récentes (contexte de conversation).
+async function recentActivities(token, days = 10) {
+  const after = Math.floor(Date.now() / 1000) - days * 86400
+  const res = await fetch(
+    `https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=30`,
+    { headers: { authorization: `Bearer ${token}` } }
+  )
+  if (!res.ok) return []
+  const acts = await res.json()
+  return acts.map((a) => ({
+    date: a.start_date_local?.slice(0, 10),
+    type: a.sport_type,
+    nom: a.name,
+    km: a.distance ? +(a.distance / 1000).toFixed(1) : null,
+    dplus: a.total_elevation_gain ? Math.round(a.total_elevation_gain) : null,
+    min: a.moving_time ? Math.round(a.moving_time / 60) : null,
+    fc: a.average_heartrate ? Math.round(a.average_heartrate) : null
+  }))
+}
+
+const CHAT_SYSTEM = `Tu es le coach personnel de l'athlète — le meilleur du monde en endurance (trail/marathon) et en force. \
+Il prépare un marathon trail 42K/900 D+, objectif sub-4h. Vous discutez : il te parle comme à son coach ("j'ai mal ici", "je suis cuit", "je peux décaler ma séance ?", "je remplace par quoi ?"). \
+Tu connais son plan, sa séance du jour, son état du jour et ses séances réelles des 10 derniers jours (contexte ci-dessous) : appuie-toi dessus, cite les chiffres quand c'est utile, n'invente jamais de données. \
+\
+DOULEUR — prends toujours au sérieux. Distingue courbature/gêne musculaire (souvent ok en adaptant) d'une douleur articulaire, aiguë, unilatérale, qui augmente à l'effort ou modifie la foulée (STOP, pas de héros). Ne pose jamais de diagnostic. Si la douleur est aiguë, persiste plus de quelques jours, ou modifie la foulée → dis-lui clairement de consulter (médecin du sport / kiné). \
+FATIGUE — regarde l'état du jour (sommeil, fatigue 1-5, FC repos) et la charge des derniers jours. Fatigue ≥4, mauvais sommeil ou FC repos élevée → allège franchement, propose une alternative concrète plutôt que "repose-toi" : durée précise, allure, ou repos complet assumé. \
+ADAPTATION — quand il veut changer/décaler une séance, propose UNE option claire et chiffrée (et une variante si vraiment pertinent), en protégeant les séances clés (sortie longue, qualité) et en sacrifiant en priorité le volume easy. Dis ce que ça coûte ou non pour l'objectif. \
+\
+Principes du plan : course 100% easy (>5:01/km, allure conversation) ; power hiking en montée FC <150 ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
+\
+STYLE : français, tutoiement, ton direct, chaleureux, honnête — jamais complaisant. Réponse COURTE : 2 à 5 phrases, ~80 mots max, en conversation naturelle (pas de titres, pas de structure markdown lourde, **gras** seulement pour un chiffre ou une consigne clé). Pas de disclaimer générique, pas de "en tant que coach". Va droit au but. Si une info te manque pour bien répondre (où exactement, depuis quand, à l'effort ou au repos), pose UNE question précise.`
+
+async function callClaudeChat(env, system, messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-8',
+      max_tokens: 700,
+      output_config: { effort: env.EFFORT || 'medium' },
+      system,
+      messages: messages.map((m) => ({ role: m.role, content: String(m.content).slice(0, 2000) }))
+    })
+  })
+  if (!res.ok) throw new Error(`anthropic ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+  return text || 'Je n’ai pas réussi à répondre, réessaie.'
 }
 
 // ---- Claude (le coach) ----
