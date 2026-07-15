@@ -116,11 +116,14 @@ async function handleDebrief(request, env) {
     return json({ error: 'unauthorized' }, 401)
 
   const body = await request.json().catch(() => ({}))
-  const { date, planned, context, force } = body
+  const { date, planned, context, force, planKey } = body
   if (!date || !planned) return json({ error: 'bad_request' }, 400)
 
-  const cacheKey = `debrief:${date}`
-  if (!force) {
+  // La date seule ne suffit pas comme clé : si la séance prévue change (recalage du
+  // calendrier, adaptation décidée avec le coach), le débrief d'avant est hors-sujet.
+  // Sans empreinte (vieux client), on ne touche pas au cache du tout.
+  const cacheKey = planKey ? `debrief:${date}:${planKey}` : null
+  if (cacheKey && !force) {
     const cached = await env.TOKENS.get(cacheKey)
     if (cached) return json({ ...JSON.parse(cached), cached: true })
   }
@@ -136,7 +139,13 @@ async function handleDebrief(request, env) {
 
   const debrief = await callClaude(env, { planned, context, actuals })
   const payload = { debrief, activities: actuals }
-  await env.TOKENS.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 * 120 })
+
+  // « Aucune activité trouvée » est une réponse datée, pas un verdict : la séance peut
+  // très bien arriver dans l'heure. La figer 120 jours donnerait un coach qui répète
+  // « tu n'as rien fait » après coup. On ne met en cache qu'un débrief qui porte sur du réel.
+  if (cacheKey && actuals.length)
+    await env.TOKENS.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 * 120 })
+
   return json({ ...payload, cached: false })
 }
 

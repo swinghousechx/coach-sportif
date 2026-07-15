@@ -42,6 +42,8 @@ export interface DebriefResult {
   activities?: DebriefActivity[]
   activity?: DebriefActivity | null // ancienne forme (rétro-compat cache)
   cached?: boolean
+  /** Empreinte de la séance prévue au moment du débrief (voir planFingerprint). */
+  planKey?: string
 }
 
 /** Normalise vers un tableau (gère l'ancienne forme `activity`). */
@@ -55,6 +57,29 @@ export function matchTypeFor(day: Day): 'weight' | 'run' {
   return day.type === 'gym' || day.type === 'gym_and_run' ? 'weight' : 'run'
 }
 
+/**
+ * Empreinte de la séance PRÉVUE. Elle entre dans la clé de cache du débrief :
+ * la date seule ne suffit pas — si le plan du jour change (recalage du calendrier,
+ * adaptation décidée avec le coach), le débrief d'avant devient un hors-sujet.
+ * Une empreinte différente = un débrief à refaire, pas à ressortir du cache.
+ */
+export function planFingerprint(day: Day): string {
+  const src = JSON.stringify({
+    l: day.label,
+    t: day.type,
+    n: day.sessionName ?? null,
+    d: day.description ?? null,
+    km: day.distanceKm ?? null,
+    dp: day.elevationM ?? null,
+    ex: day.exercises?.map((e) => [e.name, e.sets, e.reps]) ?? null,
+    r: day.run ? [day.run.description ?? null, day.run.distanceKm ?? null] : null,
+    a: day.adapted?.appliedAt ?? null
+  })
+  let h = 5381 // djb2
+  for (let i = 0; i < src.length; i++) h = ((h << 5) + h + src.charCodeAt(i)) | 0
+  return (h >>> 0).toString(36)
+}
+
 export async function fetchDebrief(
   day: Day,
   week: Week,
@@ -62,6 +87,7 @@ export async function fetchDebrief(
   force = false
 ): Promise<DebriefResult> {
   if (!API) throw new Error('coach non configuré')
+  const planKey = planFingerprint(day)
   const r = await fetch(`${API}/debrief`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...(SECRET ? { 'x-app-secret': SECRET } : {}) },
@@ -69,6 +95,7 @@ export async function fetchDebrief(
       date: day.date,
       matchType: matchTypeFor(day),
       force,
+      planKey,
       planned: day,
       context: {
         raceDate: program.raceDate,
@@ -82,7 +109,7 @@ export async function fetchDebrief(
     const detail = await r.json().catch(() => ({}))
     throw new Error(detail.error || `erreur ${r.status}`)
   }
-  return r.json()
+  return { ...(await r.json()), planKey }
 }
 
 // ---- Chat avec le coach ----
@@ -210,10 +237,16 @@ export function saveEtat(date: string, etat: DailyState): void {
 
 const KEY = 'coach:debriefs'
 
-export function loadDebrief(date: string): DebriefResult | null {
+/**
+ * Débrief en cache pour ce jour, seulement s'il porte sur la séance actuellement prévue.
+ * Empreinte absente (débrief d'avant ce correctif) ou différente → on considère qu'il
+ * n'y en a pas : mieux vaut reproposer le bouton qu'afficher un débrief hors-sujet.
+ */
+export function loadDebrief(date: string, planKey: string): DebriefResult | null {
   try {
     const all = JSON.parse(localStorage.getItem(KEY) || '{}')
-    return all[date] ?? null
+    const hit = all[date]
+    return hit && hit.planKey === planKey ? hit : null
   } catch {
     return null
   }

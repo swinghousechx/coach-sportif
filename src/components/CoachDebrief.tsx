@@ -5,6 +5,7 @@ import {
   debriefActivities,
   fetchDebrief,
   loadDebrief,
+  planFingerprint,
   saveDebrief,
   type DebriefResult
 } from '../lib/coach'
@@ -18,7 +19,9 @@ interface Props {
 
 // Bouton "Débrief du coach" + rendu du débrief IA (données Strava réelles).
 export default function CoachDebrief({ day, week, program }: Props) {
-  const [result, setResult] = useState<DebriefResult | null>(() => loadDebrief(day.date))
+  // Le débrief en cache n'est repris que s'il porte sur la séance actuellement prévue.
+  const planKey = planFingerprint(day)
+  const [result, setResult] = useState<DebriefResult | null>(() => loadDebrief(day.date, planKey))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false) // replié par défaut (déplié après une génération)
@@ -29,7 +32,9 @@ export default function CoachDebrief({ day, week, program }: Props) {
     try {
       const r = await fetchDebrief(day, week, program, force)
       setResult(r)
-      saveDebrief(day.date, r)
+      // Un débrief sans activité trouvée n'est pas une conclusion : la séance peut
+      // encore arriver. On l'affiche sans le figer, pour ne pas le ressortir demain.
+      if (debriefActivities(r).length) saveDebrief(day.date, r)
       setOpen(true)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'erreur'
