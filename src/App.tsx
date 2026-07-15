@@ -204,12 +204,13 @@ export default function App() {
           />
         )}
 
-        <div className="mt-6">
-          <UpdateButton onLoaded={handleLoaded} />
-          <p className="mt-3 px-2 text-center text-[12px] leading-relaxed text-white/60">
-            Plan marathon trail · course le 11 oct. 2026. Fonctionne hors-ligne une fois installé.
-          </p>
-        </div>
+        {/* Pas d'import de programme ici : le plan est généré par scripts/gen-plan.mjs et
+            déployé avec l'app. Un fichier importé s'épinglait dans localStorage, et l'app ne
+            relisait alors plus jamais program.json — toute correction ultérieure passait à la
+            trappe en silence. L'import ne survit que sur l'écran d'erreur, en secours. */}
+        <p className="mt-6 px-2 text-center text-[12px] leading-relaxed text-white/60">
+          Plan marathon trail · course le 11 oct. 2026. Fonctionne hors-ligne une fois installé.
+        </p>
       </div>
       </PullToRefresh>
     </MotionConfig>
