@@ -21,6 +21,12 @@
     height: 100%;
   }
 
+  /* Le rebond natif se battrait avec le tirer-pour-rafraîchir (voir PullToRefresh). */
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
   body {
     @apply bg-ink text-white font-body antialiased;
     /* Halo lumineux discret en haut, ambiance "night run". */

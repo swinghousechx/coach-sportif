@@ -12,6 +12,7 @@ import DayCard from './components/DayCard'
 import ProgramOverview from './components/ProgramOverview'
 import RecoTab from './components/RecoTab'
 import UpdateButton from './components/UpdateButton'
+import PullToRefresh from './components/PullToRefresh'
 
 function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -138,6 +139,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <PullToRefresh onRefresh={() => window.location.reload()}>
       <div className="mx-auto min-h-full max-w-md px-4 pb-10 pt-4">
         <div className="mb-2 flex justify-end">
           <button
@@ -200,6 +202,7 @@ export default function App() {
           </p>
         </div>
       </div>
+      </PullToRefresh>
     </MotionConfig>
   )
 }
