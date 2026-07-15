@@ -4,6 +4,7 @@ import type { CarnetEntry } from '../lib/carnet'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
 import BriefingCard from './BriefingCard'
 import CarnetCard from './CarnetCard'
+import ReadinessCard from './ReadinessCard'
 import ChatCoach from './ChatCoach'
 import EtatDuJour from './EtatDuJour'
 import ProfilCard from './ProfilCard'
@@ -62,6 +63,9 @@ export default function RecoTab({ program, todayDate, onApplyAdaptation, carnet,
 
       {/* Ce que le coach retient de toi — visible, effaçable. */}
       {isCoachEnabled() && <CarnetCard entries={carnet} onChange={onCarnetChange} />}
+
+      {/* Où j'en suis face à l'objectif — des faits, pas un chrono prédit. */}
+      {isCoachEnabled() && <ReadinessCard program={program} />}
 
       {/* Le brief d'avant-séance : le troisième temps, après le débrief et le chat. */}
       {isCoachEnabled() && resolved.entry && (

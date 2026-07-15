@@ -241,12 +241,17 @@ export function profilContext() {
     // coach ne peut pas voir un saut de charge, ce qui est son premier travail.
     volume8SemainesKm: p.weeklySeries,
     plusLongueKm: p.longestKm,
+    // La muscu fait la moitié du plan et n'était suivie nulle part dans le temps.
+    force: p.force?.length ? p.force : undefined,
     zonesFc: zones
       ? {
           methode: zones.method === 'karvonen' ? 'réserve cardiaque (Karvonen)' : '% FC max',
           ...Object.fromEntries(zones.zones.map((z) => [z.key, `${z.lo}-${z.hi} bpm`]))
         }
-      : undefined
+      : undefined,
+    // Bornes numériques : le worker en a besoin pour découper les streams FC en zones.
+    // Les chaînes ci-dessus sont pour le coach, celles-ci pour le calcul.
+    zonesBornes: zones?.zones.map((z) => ({ key: z.key, lo: z.lo, hi: z.hi }))
   }
 }
 

@@ -21,9 +21,17 @@ export interface Profil {
   easyHrMedian: number | null
   weeklyKm: number | null
   weeklySeries?: number[] // km des 8 dernières semaines, de la plus ancienne à la plus récente
+  /** Progression en force, parsée des descriptions Hevy (8 semaines). */
+  force?: ForceEntry[]
   longestKm: number | null
   longestElevM: number | null
   cached?: boolean
+}
+
+export interface ForceEntry {
+  exercice: string
+  seances: { date: string; topKg: number | null; series: number; reps: string }[]
+  stagnantDepuis3Seances?: boolean
 }
 
 export interface Zone {

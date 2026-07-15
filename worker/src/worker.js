@@ -139,7 +139,14 @@ async function handleDebrief(request, env) {
   const { weight, run } = await findActivities(token, date)
   const actuals = []
   if (weight) actuals.push(activitySummary(await enrichActivity(token, weight.id), 'muscu'))
-  if (run) actuals.push(activitySummary(await enrichActivity(token, run.id), 'course'))
+  if (run) {
+    const s = activitySummary(await enrichActivity(token, run.id), 'course')
+    // Le temps en zone remplace la FC moyenne comme preuve : il faut les zones de
+    // l'athlète, que seule l'app connaît (FC max observée + FC repos saisie).
+    const zones = context?.profil?.zonesBornes
+    if (zones?.length) s.tempsEnZone = timeInZones(await fetchStreams(token, run.id), zones)
+    actuals.push(s)
+  }
 
   // Les 14 derniers jours : un débrief qui ne voit qu'une journée juge une séance
   // hors de sa charge, de sa tendance et de son enchaînement.
@@ -171,6 +178,75 @@ async function findActivities(token, date) {
   return {
     weight: sameDay.find((a) => WEIGHT_TYPES.includes(a.sport_type)) || null,
     run: sameDay.find((a) => RUN_TYPES.includes(a.sport_type)) || null
+  }
+}
+
+/**
+ * Temps passé dans chaque zone FC, seconde par seconde.
+ *
+ * Une FC moyenne ment : 154 de moyenne peut être 38 min en Z2 + 12 min en Z4, ou
+ * une heure pile à 154. Même chiffre, entraînement radicalement différent. Sur un
+ * plan « 100 % easy », c'est la seule mesure qui prouve quoi que ce soit.
+ */
+async function fetchStreams(token, id) {
+  const res = await fetch(
+    `https://www.strava.com/api/v3/activities/${id}/streams?keys=heartrate,time&key_by_type=true`,
+    { headers: { authorization: `Bearer ${token}` } }
+  )
+  return res.ok ? res.json() : null
+}
+
+function timeInZones(streams, zones) {
+  const hr = streams?.heartrate?.data
+  const time = streams?.time?.data
+  if (!hr?.length || !time?.length || !zones?.length) return null
+
+  const bounds = [...zones].sort((a, b) => a.lo - b.lo)
+
+  // Ce qui est une « pause » dépend de la cadence d'enregistrement de la montre.
+  // Un seuil fixe à 30 s jetterait TOUS les points d'un appareil qui enregistre
+  // toutes les 60 s (enregistrement intelligent) — et ne renverrait rien, en silence.
+  const deltas = []
+  for (let i = 1; i < time.length; i++) {
+    const d = time[i] - time[i - 1]
+    if (d > 0) deltas.push(d)
+  }
+  const cadence = median(deltas) || 1
+  const trou = Math.max(30, cadence * 5)
+
+  const sec = {}
+  let total = 0
+
+  for (let i = 1; i < hr.length; i++) {
+    const dt = time[i] - time[i - 1]
+    // Pause ou perte de signal : on ne l'attribue à aucune zone.
+    if (!(dt > 0) || dt > trou) continue
+    const v = hr[i]
+    if (!v) continue
+
+    let key = 'sousZ1'
+    if (v >= bounds[bounds.length - 1].lo) key = bounds[bounds.length - 1].key // au-delà de la FC max observée
+    else {
+      const z = bounds.find((b) => v >= b.lo && v < b.hi)
+      if (z) key = z.key
+      else if (v >= bounds[0].lo) key = bounds[bounds.length - 1].key
+    }
+    sec[key] = (sec[key] || 0) + dt
+    total += dt
+  }
+  if (!total) return null
+
+  const min = (s) => Math.round(s / 60)
+  const out = {}
+  for (const k of ['sousZ1', ...bounds.map((b) => b.key)]) if (sec[k]) out[k] = `${min(sec[k])} min`
+
+  // Le chiffre qui compte sur un plan easy : combien de temps au-dessus de la Z2.
+  const z2 = bounds.find((b) => b.key === 'Z2')
+  const above = z2 ? Object.entries(sec).filter(([k]) => /^Z[3-5]$/.test(k)).reduce((a, [, v]) => a + v, 0) : 0
+  return {
+    parZone: out,
+    totalMin: min(total),
+    auDessusDeZ2: z2 ? `${min(above)} min (${Math.round((above / total) * 100)} %)` : undefined
   }
 }
 
@@ -308,7 +384,15 @@ async function handleProfil(request, env) {
   const acts = await allActivities(token, after)
   const runs = acts.filter((a) => RUN_TYPES.includes(a.sport_type) && a.distance > 2000)
 
+  // Force : 8 semaines suffisent pour voir une progression ou un plateau, et
+  // chaque séance coûte un appel Strava (la description n'est pas dans la liste).
+  const weights = acts
+    .filter((a) => WEIGHT_TYPES.includes(a.sport_type) && sinceDays(a.start_date_local) <= 56)
+    .sort((a, b) => a.start_date_local.localeCompare(b.start_date_local))
+    .slice(-24)
+
   const profil = buildProfil(runs, days)
+  profil.force = await buildForce(token, weights)
   // 12 h : le profil bouge lentement, inutile de rappeler Strava à chaque ouverture.
   await env.TOKENS.put(cacheKey, JSON.stringify(profil), { expirationTtl: 60 * 60 * 12 })
   return json({ ...profil, cached: false })
@@ -380,6 +464,81 @@ function median(xs) {
   const s = [...xs].sort((a, b) => a - b)
   const m = Math.floor(s.length / 2)
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+
+// ---- Progression en force (descriptions Hevy postées sur Strava) ----
+//
+// La muscu, c'est 3 séances sur 7 — la moitié du plan, et l'app n'en gardait rien
+// dans le temps. Le coach ne pouvait donc pas vérifier la colonne vertébrale du plan
+// (« progression jusqu'à S4, puis maintenance jambes ») ni voir un squat qui stagne.
+// Hevy suit tout ça, mais Hevy ne parle pas au coach.
+
+const SET_WEIGHTED = /^set\s*\d+\s*[:.)-]?\s*([\d.]+)\s*(kg|lbs?|lb)?\s*[x×*]\s*(\d+)/i
+const SET_BODYWEIGHT = /^set\s*\d+\s*[:.)-]?\s*(\d+)\s*reps?\b/i
+
+function parseHevy(description) {
+  if (!description) return []
+  const items = []
+  let current = null
+
+  for (const raw of description.split(/\r?\n/)) {
+    const line = raw.trim()
+    if (!line) continue
+
+    const w = line.match(SET_WEIGHTED)
+    if (w) {
+      current?.sets.push({ weight: parseFloat(w[1]), unit: (w[2] || 'kg').toLowerCase(), reps: parseInt(w[3], 10) })
+      continue
+    }
+    const b = line.match(SET_BODYWEIGHT)
+    if (b) {
+      current?.sets.push({ reps: parseInt(b[1], 10) })
+      continue
+    }
+    const name = line.replace(/[\s*_~•-]+$/, '').replace(/^[\s*_~•-]+/, '').trim()
+    if (!/[a-zà-ÿ]/i.test(name)) continue
+    current = { name, sets: [] }
+    items.push(current)
+  }
+
+  return items
+    .filter((it) => it.sets.length > 0)
+    .map((it) => {
+      const weights = it.sets.map((s) => s.weight).filter((w) => w != null)
+      return {
+        name: it.name,
+        sets: it.sets.length,
+        topKg: weights.length ? Math.max(...weights) : null,
+        reps: it.sets.map((s) => s.reps).join(',')
+      }
+    })
+}
+
+/** Historique par exercice, du plus ancien au plus récent — de quoi voir une stagnation. */
+async function buildForce(token, weights) {
+  const byExercise = {}
+
+  for (const a of weights) {
+    const full = await enrichActivity(token, a.id)
+    const date = (full?.start_date_local || a.start_date_local || '').slice(0, 10)
+    for (const ex of parseHevy(full?.description || '')) {
+      const k = ex.name
+      byExercise[k] = byExercise[k] || []
+      byExercise[k].push({ date, topKg: ex.topKg, series: ex.sets, reps: ex.reps })
+    }
+  }
+
+  return Object.entries(byExercise)
+    .map(([exercice, seances]) => {
+      const s = seances.sort((x, y) => x.date.localeCompare(y.date)).slice(-6)
+      const charges = s.map((x) => x.topKg).filter((v) => v != null)
+      // Une charge qui n'a pas bougé sur les 3 dernières séances, c'est un plateau
+      // — et c'est exactement ce que le plan interdit tant qu'on est en progression.
+      const last3 = charges.slice(-3)
+      const stagnant = last3.length === 3 && new Set(last3).size === 1
+      return { exercice, seances: s, stagnantDepuis3Seances: stagnant || undefined }
+    })
+    .filter((e) => e.seances.length > 1) // un exercice vu une seule fois ne dit rien
 }
 const sum = (xs) => xs.reduce((a, b) => a + b, 0)
 const sinceDays = (iso) => (Date.now() - new Date(iso).getTime()) / 86400_000
@@ -569,6 +728,7 @@ Le contexte te donne le plan DÉJÀ adapté : si une journée porte "adapted", e
 \
 CARNET DE BORD — c'est ta mémoire. Le contexte contient "carnet" : ce que TU as noté les jours précédents. Lis-le AVANT de répondre et sers-t'en : reviens sur une douleur ouverte ("ton genou, ça donne quoi depuis mardi ?"), constate qu'un schéma persiste ou se corrige, tiens compte d'une décision déjà prise. Un athlète doit sentir que tu te souviens de lui. \
 Avec l'outil "noter_au_carnet", consigne ce qui doit SURVIVRE à cet échange, et clos ce qui est réglé. Sois avare : une note par échange au maximum, souvent aucune. Un carnet noyé sous les détails ne sert plus à rien. N'y mets jamais ce que Strava, le plan ou le profil disent déjà. \
+FORCE — "profil.force" contient l'historique de ses charges par exercice (8 semaines, parsé de ses séances Hevy), du plus ancien au plus récent, avec un drapeau "stagnantDepuis3Seances". La muscu, c'est 3 séances sur 7 : ne la traite pas en second rôle. Le plan est explicite — progression jusqu'à S4, puis JAMBES EN MAINTENANCE (charges figées) tandis que le haut du corps continue de monter, règle « +2,5 kg si RPE ≤8 ». Confronte le réel à cette règle : un squat figé depuis 3 séances alors qu'on est encore en progression, c'est une occasion perdue, dis-le avec les kilos ; une fois en maintenance, une charge stable est NORMALE et il ne faut surtout pas pousser. Cite les vrais chiffres (« ton bench est à 80 kg depuis le 20/06 »). \
 MONTER EST BORNÉ. La progression du plan est déjà calculée : périodisation, règle des ~10 %, semaines de deload existent pour le protéger de ses bons jours — "je me sens bien" est la première cause d'explosion d'un bloc. Donc jamais de volume au-delà de ce que le plan prévoit, jamais de sortie longue rallongée, jamais de deload sabordé parce qu'il est en forme. Ce qui est permis à la hausse : restaurer une séance allégée, rattraper une séance sautée si la charge le permet, exécuter en haut de la fourchette prévue, et monter les charges en muscu selon la règle du plan (+2,5 kg si RPE ≤8) tant que les jambes ne sont pas en maintenance. En top forme, la bonne réponse est souvent "déroule, et garde-en sous le pied". \
 SES CHIFFRES — le contexte contient un "profil" mesuré sur ses vraies sorties Strava : FC max observée, FC repos, zones FC recalibrées, allure easy médiane, volume hebdo. Ce sont exactement les chiffres AFFICHÉS dans son app, sur chaque séance : raisonne et parle avec CEUX-LÀ. Ne recalcule jamais ses zones de tête, n'utilise pas 220-âge, ne cite pas une FC cible qui contredirait ses zones. Profil absent : dis-le, n'invente pas de repère. \
 \
@@ -586,9 +746,10 @@ Le contexte contient un "profil" mesuré sur ses vraies sorties Strava (FC max o
 \
 CARNET DE BORD — c'est ta mémoire. Le contexte contient "carnet" : ce que TU as noté les jours précédents. Lis-le AVANT de répondre et sers-t'en : reviens sur une douleur ouverte ("ton genou, ça donne quoi depuis mardi ?"), constate qu'un schéma persiste ou se corrige, tiens compte d'une décision déjà prise. Un athlète doit sentir que tu te souviens de lui. \
 Avec l'outil "noter_au_carnet", consigne ce qui doit SURVIVRE à cet échange, et clos ce qui est réglé. Sois avare : une note par échange au maximum, souvent aucune. Un carnet noyé sous les détails ne sert plus à rien. N'y mets jamais ce que Strava, le plan ou le profil disent déjà. \
+FORCE — "profil.force" contient l'historique de ses charges par exercice (8 semaines, parsé de ses séances Hevy), du plus ancien au plus récent, avec un drapeau "stagnantDepuis3Seances". La muscu, c'est 3 séances sur 7 : ne la traite pas en second rôle. Le plan est explicite — progression jusqu'à S4, puis JAMBES EN MAINTENANCE (charges figées) tandis que le haut du corps continue de monter, règle « +2,5 kg si RPE ≤8 ». Confronte le réel à cette règle : un squat figé depuis 3 séances alors qu'on est encore en progression, c'est une occasion perdue, dis-le avec les kilos ; une fois en maintenance, une charge stable est NORMALE et il ne faut surtout pas pousser. Cite les vrais chiffres (« ton bench est à 80 kg depuis le 20/06 »). \
 NE DÉBRIEFE JAMAIS UNE JOURNÉE ISOLÉE. Tu reçois aussi "semaineEnCours", "adherence", "profil.volume8SemainesKm" et les 14 derniers jours Strava : la séance du jour ne se juge que dans cet enchaînement. Regarde la CHARGE (un bond de plus de ~10 % du volume hebdo d'une semaine sur l'autre est un risque à nommer, chiffres à l'appui), la RÉPÉTITION (troisième easy d'affilée au-dessus de la Z2 = un schéma, pas un accident) et l'ADHÉRENCE (séances non cochées : dis-le sans moraliser, et rappelle ce que ça coûte pour l'objectif). \
 L'adhérence est déclarative : une case non cochée peut être une séance faite sans la cocher. Si Strava montre l'activité, fie-toi à Strava. \
-Une moyenne masque : une allure moyenne sur du D+ ou une FC moyenne sur une sortie vallonnée ne prouvent pas grand-chose. Reste prudent sur ce qu'une moyenne permet d'affirmer. \
+TEMPS EN ZONE — quand une séance course porte "tempsEnZone", c'est TA preuve : juge la discipline easy avec ÇA, pas avec la FC moyenne. Une moyenne de 154 peut être 38 min en Z2 + 12 min en Z4, ou une heure pile à 154 : même chiffre, entraînement radicalement différent. Cite les minutes réelles (« 12 min au-dessus de la Z2 »). Sur un plan 100 % easy, quelques minutes en Z3 sur une bosse sont normales ; un quart de la séance au-dessus de la Z2 ne l'est pas. Si "tempsEnZone" est absent (pas de cardio, ou zones inconnues), dis-le et reste prudent : une allure ou une FC moyenne sur du D+ ne prouve pas grand-chose. \
 Si le contexte contient un "etatDuJour" (sommeil bien/moyen/mauvais, fatigue 1-5, FC repos en bpm), PONDÈRE tes conseils selon la récup : FC repos élevée vs d'habitude, sommeil mauvais ou fatigue ≥4 → recommande d'alléger / prioriser la récup ; bon état → dis-le, et laisse-le exécuter pleinement (haut de la fourchette, charge muscu qui monte si le RPE le permet) sans jamais rajouter du volume au-delà du plan : sa progression est déjà calculée. \
 Écris en français, tutoiement, ton direct et motivant mais honnête, concret et chiffré. Structure courte en markdown : \
 une ligne **Bilan** (verdict global de la journée), puis **Ce qui va** (2-4 puces), **À surveiller** (1-3 puces si pertinent), **Pour la suite** (1-2 conseils actionnables). \
