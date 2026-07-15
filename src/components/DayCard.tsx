@@ -14,6 +14,8 @@ interface Props {
   isToday: boolean
   done: boolean
   onToggle: () => void
+  /** Rétablit la séance d'origine si la journée a été adaptée avec le coach. */
+  onRevert?: () => void
   week?: Week
   program?: Program
 }
@@ -21,9 +23,11 @@ interface Props {
 const EASE_EXPO = [0.16, 1, 0.3, 1] as const
 
 const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
-  { day, index, isToday, done, onToggle, week, program },
+  { day, index, isToday, done, onToggle, onRevert, week, program },
   ref
 ) {
+  // Replié par défaut, sauf le jour même et le jour de course : la semaine se lit d'un coup d'œil.
+  const [open, setOpen] = useState(isToday || day.type === 'race')
   const accent = accentFor(day.type)
   const accentText = ACCENT_TEXT[accent]
   const isRace = day.type === 'race'
@@ -63,7 +67,13 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
       />
 
       <div className="flex items-start justify-between gap-3 pl-2">
-        <div className="min-w-0">
+        {/* L'en-tête entier plie/déplie la journée. */}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="focus-ring min-w-0 flex-1 text-left"
+        >
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             <span className={`badge ${ACCENT_BG[accent]} ${accentText} inline-flex items-center gap-1`}>
               <Icon name={typeIcon(day.type)} size={12} />
@@ -73,83 +83,119 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
               {day.label}
             </span>
             {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
+            {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
           </div>
 
-          <h2
-            className={`text-balance font-display font-semibold leading-tight tracking-tight ${
-              isRace ? 'text-2xl' : 'text-xl'
-            } ${done ? 'text-white/70 line-through decoration-white/40' : 'text-white'}`}
-          >
-            {title}
-          </h2>
+          <div className="flex items-start gap-2">
+            <Icon
+              name="chevron"
+              size={16}
+              className="mt-1 shrink-0 text-white/35 transition-transform duration-300 [transition-timing-function:var(--ease-out-expo)]"
+              style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+            />
+            <h2
+              className={`text-balance font-display font-semibold leading-tight tracking-tight ${
+                isRace ? 'text-2xl' : 'text-xl'
+              } ${done ? 'text-white/70 line-through decoration-white/40' : 'text-white'}`}
+            >
+              {title}
+            </h2>
+          </div>
 
           {isRace && day.goalTime && (
             <p className="mt-1 font-display text-sm font-semibold uppercase tracking-widest text-run">
               Objectif {day.goalTime.replace(':00:00', 'h')}
             </p>
           )}
-
-          {!day.sessionName && day.description && showRunSummary && day.description !== title && (
-            <p className="mt-1 text-[13px] leading-snug text-white/70">{day.description}</p>
-          )}
-          {day.type === 'rest_or_easy' && (
-            <p className="mt-1 text-[13px] leading-snug text-white/70">{day.description}</p>
-          )}
-        </div>
+        </button>
 
         <ToggleDone done={done} onToggle={onToggle} label={title} />
       </div>
 
-      {showRunSummary && <RunSummary detail={day} className="pl-2" />}
-
-      {hasExercises && (
-        <ul className="mt-3 divide-y divide-white/5 border-t border-white/5 pl-2 pt-1">
-          {day.exercises!.map((ex, i) => (
-            <li key={i} className="flex items-baseline justify-between gap-3 py-2">
-              <span className="min-w-0">
-                <span className="block truncate text-[15px] text-white/90">{ex.name}</span>
-                {ex.note && (
-                  <span className="mt-0.5 block text-[11px] leading-snug text-white/45">{ex.note}</span>
-                )}
-              </span>
-              <span
-                className={`shrink-0 font-display text-lg font-bold tabular-nums tracking-wide ${accentText}`}
-              >
-                {ex.sets}×{ex.reps}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Muscu : Hevy remonte la séance sur Strava (WeightTraining) → matching + réalisé. */}
-      {isMuscu && <StravaLink summary={day.strava} />}
-
-      {/* Bloc course dans une journée muscu + course (jeudi). */}
-      {day.type === 'gym_and_run' && day.run && (
-        <div className="mt-3 rounded-2xl border border-run/20 bg-run/[0.06] p-3">
-          <div className="mb-1 flex items-center gap-2">
-            <Icon name="activity" size={15} className="text-run" />
-            <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-run">
-              Course qualité
-            </span>
-          </div>
-          {day.run.description && (
-            <p className="text-[13px] leading-snug text-white/80">{day.run.description}</p>
+      {/* Corps repliable (grid-template-rows 0fr→1fr, comme le débrief). */}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 [transition-timing-function:var(--ease-out-expo)]"
+        style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+      >
+        <div className="overflow-hidden">
+          {!day.sessionName && day.description && showRunSummary && day.description !== title && (
+            <p className="mt-1 pl-2 text-[13px] leading-snug text-white/70">{day.description}</p>
           )}
-          <RunSummary detail={day.run} className="mt-2" />
-          <StravaLink summary={day.runStrava} />
+          {day.type === 'rest_or_easy' && (
+            <p className="mt-1 pl-2 text-[13px] leading-snug text-white/70">{day.description}</p>
+          )}
+
+          {/* Journée modifiée avec le coach : on dit pourquoi, et on peut revenir en arrière. */}
+          {day.adapted && (
+            <div className="mt-2 flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+              <p className="text-pretty text-[12px] leading-snug text-white/55">{day.adapted.raison}</p>
+              {onRevert && (
+                <button
+                  type="button"
+                  onClick={onRevert}
+                  className="focus-ring shrink-0 text-[11px] font-semibold uppercase tracking-widest text-white/40 transition-colors hover:text-white/75"
+                >
+                  Rétablir
+                </button>
+              )}
+            </div>
+          )}
+
+          {showRunSummary && <RunSummary detail={day} className="pl-2" />}
+
+          {hasExercises && (
+            <ul className="mt-3 divide-y divide-white/5 border-t border-white/5 pl-2 pt-1">
+              {day.exercises!.map((ex, i) => (
+                <li key={i} className="flex items-baseline justify-between gap-3 py-2">
+                  <span className="min-w-0">
+                    <span className="block truncate text-[15px] text-white/90">{ex.name}</span>
+                    {ex.note && (
+                      <span className="mt-0.5 block text-[11px] leading-snug text-white/45">
+                        {ex.note}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className={`shrink-0 font-display text-lg font-bold tabular-nums tracking-wide ${accentText}`}
+                  >
+                    {ex.sets}×{ex.reps}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Muscu : Hevy remonte la séance sur Strava (WeightTraining) → matching + réalisé. */}
+          {isMuscu && <StravaLink summary={day.strava} />}
+
+          {/* Bloc course dans une journée muscu + course (jeudi). */}
+          {day.type === 'gym_and_run' && day.run && (
+            <div className="mt-3 rounded-2xl border border-run/20 bg-run/[0.06] p-3">
+              <div className="mb-1 flex items-center gap-2">
+                <Icon name="activity" size={15} className="text-run" />
+                <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-run">
+                  Course qualité
+                </span>
+              </div>
+              {day.run.description && (
+                <p className="text-[13px] leading-snug text-white/80">{day.run.description}</p>
+              )}
+              <RunSummary detail={day.run} className="mt-2" />
+              <StravaLink summary={day.runStrava} />
+            </div>
+          )}
+
+          {isRunFamily && <StravaLink summary={day.strava} />}
+
+          {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
+
+          {/* Débrief IA de la séance réelle (Strava) — sur chaque jour, repos compris :
+              un jour « repos ou footing » se débriefe aussi (footing fait ? repos tenu ?). */}
+          {isCoachEnabled() && week && program && (
+            <CoachDebrief day={day} week={week} program={program} />
+          )}
         </div>
-      )}
-
-      {isRunFamily && <StravaLink summary={day.strava} />}
-
-      {day.nutrition && <NutritionBlock nutrition={day.nutrition} />}
-
-      {/* Débrief IA de la séance réelle (Strava) — seulement si le backend est branché. */}
-      {isCoachEnabled() && week && program && day.type !== 'rest_or_easy' && (
-        <CoachDebrief day={day} week={week} program={program} />
-      )}
+      </div>
     </motion.section>
   )
 })

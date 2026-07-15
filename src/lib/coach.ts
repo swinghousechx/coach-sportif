@@ -1,4 +1,4 @@
-import type { Day, Program, Week } from '../types'
+import type { Adaptation, Day, Program, Week } from '../types'
 
 // Client du backend "Coach" (Cloudflare Worker). Tout est optionnel :
 // si VITE_COACH_API n'est pas défini, la fonctionnalité reste masquée et l'app
@@ -91,6 +91,10 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   date: string // ISO du jour où le message a été écrit (contexte temporel)
+  /** Modification du plan proposée par le coach avec ce message. */
+  adaptation?: Adaptation
+  /** Décision de l'athlète sur cette proposition (absent = pas encore tranché). */
+  decision?: 'applied' | 'ignored'
 }
 
 const CHAT_KEY = 'coach:chat'
@@ -130,7 +134,7 @@ export function clearChat(): void {
 export async function chatCoach(
   messages: ChatMessage[],
   ctx: { day: Day; week: Week; program: Program; tomorrow?: Day; today: string }
-): Promise<string> {
+): Promise<{ reply: string; adaptation?: Adaptation }> {
   if (!API) throw new Error('coach non configuré')
 
   const payload = messages.slice(-CHAT_SEND).map((m) => ({
@@ -154,6 +158,8 @@ export async function chatCoach(
         },
         seanceDuJour: ctx.day,
         seanceDeDemain: ctx.tomorrow,
+        // La semaine entière : indispensable pour décaler une séance à bon escient.
+        semaineEnCours: ctx.week.days,
         etatDuJour: loadEtat(ctx.today) ?? undefined
       }
     })
@@ -162,7 +168,8 @@ export async function chatCoach(
     const detail = await r.json().catch(() => ({}))
     throw new Error(detail.error || `erreur ${r.status}`)
   }
-  return (await r.json()).reply as string
+  const data = await r.json()
+  return { reply: data.reply as string, adaptation: data.adaptation as Adaptation | undefined }
 }
 
 function frDate(iso: string): string {

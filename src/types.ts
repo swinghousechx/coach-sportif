@@ -57,10 +57,30 @@ export interface StravaSummary {
   description?: string
 }
 
+/**
+ * Une adaptation d'une journée, décidée avec le coach et validée par l'athlète.
+ * Vit en local (localStorage), par-dessus le plan de référence — voir lib/adapt.ts.
+ */
+export interface Adaptation {
+  date: string // "YYYY-MM-DD"
+  type: DayType
+  titre: string
+  description: string
+  distanceKm?: number
+  elevationM?: number
+  /** Apport ajusté quand la charge du jour change (sinon la nutrition d'origine deviendrait fausse). */
+  calories?: number
+  noteNutrition?: string
+  raison: string
+  appliedAt: string // ISO
+}
+
 export interface Day {
   date: string // "YYYY-MM-DD"
   label: string // "Lundi" …
   type: DayType
+  /** Présent si la journée a été adaptée avec le coach (posé à l'affichage). */
+  adapted?: Adaptation
   status?: string // "done" pré-coché depuis le JSON
   sessionName?: string
   description?: string

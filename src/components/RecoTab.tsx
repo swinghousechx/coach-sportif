@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import type { Program } from '../types'
+import type { Adaptation, Program } from '../types'
 import { buildReco, type Reco } from '../lib/reco'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
 import ChatCoach from './ChatCoach'
@@ -13,10 +13,12 @@ const EASE_EXPO = [0.16, 1, 0.3, 1] as const
 interface Props {
   program: Program
   todayDate: string
+  onApplyAdaptation: (a: Adaptation) => void
 }
 
-// Onglet Reco : synchro Strava (simplifiée) + analyse de la séance du jour à la demande.
-export default function RecoTab({ program, todayDate }: Props) {
+// Onglet Coach : synchro Strava, état du jour, conversation avec le coach,
+// et briefing de la séance du jour à la demande.
+export default function RecoTab({ program, todayDate, onApplyAdaptation }: Props) {
   const reduce = useReducedMotion()
   const [state, setState] = useState<'idle' | 'analyzing' | 'done'>('idle')
 
@@ -64,6 +66,7 @@ export default function RecoTab({ program, todayDate }: Props) {
           program={program}
           tomorrow={resolved.tomorrow}
           today={todayDate}
+          onApply={onApplyAdaptation}
         />
       )}
 

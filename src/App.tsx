@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { MotionConfig } from 'framer-motion'
-import type { Program } from './types'
+import type { Adaptation, Program } from './types'
 import { currentWeekIndex, todayISO } from './lib/week'
 import { loadStoredProgram, saveProgram, loadDoneOverrides, saveDoneOverrides } from './lib/storage'
+import { applyAdaptations, loadAdaptations, saveAdaptations } from './lib/adapt'
 import Tabs, { type TabKey } from './components/Tabs'
 import RaceBanner from './components/RaceBanner'
 import Icon from './components/Icon'
@@ -17,10 +18,11 @@ function prefersReducedMotion() {
 }
 
 export default function App() {
-  const [program, setProgram] = useState<Program | null>(null)
+  const [basePlan, setBasePlan] = useState<Program | null>(null)
   const [loadError, setLoadError] = useState(false)
   const [tab, setTab] = useState<TabKey>('week')
   const [overrides, setOverrides] = useState<Record<string, boolean>>(() => loadDoneOverrides())
+  const [adaptations, setAdaptations] = useState<Record<string, Adaptation>>(() => loadAdaptations())
 
   const dayRefs = useRef<(HTMLElement | null)[]>([])
   const scrolledRef = useRef(false)
@@ -28,7 +30,7 @@ export default function App() {
   useEffect(() => {
     const stored = loadStoredProgram()
     if (stored) {
-      setProgram(stored)
+      setBasePlan(stored)
       return
     }
     fetch(`${import.meta.env.BASE_URL}program.json`, { cache: 'no-cache' })
@@ -36,11 +38,34 @@ export default function App() {
         if (!r.ok) throw new Error('fetch failed')
         return r.json()
       })
-      .then((data: Program) => setProgram(data))
+      .then((data: Program) => setBasePlan(data))
       .catch(() => setLoadError(true))
   }, [])
 
   const today = todayISO()
+
+  // Le plan affiché = plan de référence + adaptations décidées avec le coach.
+  const program = useMemo(
+    () => (basePlan ? applyAdaptations(basePlan, adaptations) : null),
+    [basePlan, adaptations]
+  )
+
+  function applyAdaptation(a: Adaptation) {
+    setAdaptations((prev) => {
+      const next = { ...prev, [a.date]: { ...a, appliedAt: new Date().toISOString() } }
+      saveAdaptations(next)
+      return next
+    })
+  }
+
+  function revertAdaptation(date: string) {
+    setAdaptations((prev) => {
+      const next = { ...prev }
+      delete next[date]
+      saveAdaptations(next)
+      return next
+    })
+  }
 
   // Dates pré-cochées depuis le JSON (day.status === 'done').
   const seedDone = useMemo(() => {
@@ -85,7 +110,7 @@ export default function App() {
 
   function handleLoaded(next: Program) {
     saveProgram(next)
-    setProgram(next)
+    setBasePlan(next)
     setLoadError(false)
     scrolledRef.current = false // les coches (par date) sont conservées
   }
@@ -148,6 +173,7 @@ export default function App() {
                   isToday={d.date === today}
                   done={isDone(d.date)}
                   onToggle={() => toggleDone(d.date)}
+                  onRevert={() => revertAdaptation(d.date)}
                   week={currentWeek}
                   program={program}
                   ref={(el) => {
@@ -163,7 +189,9 @@ export default function App() {
           <ProgramOverview weeks={program.weeks} currentIndex={currentIndex} isDone={isDone} />
         )}
 
-        {tab === 'reco' && <RecoTab program={program} todayDate={today} />}
+        {tab === 'reco' && (
+          <RecoTab program={program} todayDate={today} onApplyAdaptation={applyAdaptation} />
+        )}
 
         <div className="mt-6">
           <UpdateButton onLoaded={handleLoaded} />

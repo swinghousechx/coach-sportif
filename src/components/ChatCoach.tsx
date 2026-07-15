@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { Day, Program, Week } from '../types'
+import type { Adaptation, Day, Program, Week } from '../types'
 import { chatCoach, clearChat, loadChat, saveChat, type ChatMessage } from '../lib/coach'
+import { typeLabel } from '../lib/dayMeta'
 import Icon from './Icon'
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
   program: Program
   tomorrow?: Day
   today: string
+  /** Applique une adaptation validée par l'athlète (remonte jusqu'à App). */
+  onApply: (a: Adaptation) => void
 }
 
 // Amorces : les 3 cas réels (douleur / fatigue / adaptation).
@@ -17,7 +20,7 @@ const SUGGESTIONS = ['J’ai mal quelque part', 'Je suis cuit aujourd’hui', 'J
 
 // Conversation avec le coach : il connaît le plan, la séance du jour,
 // l'état du jour et les 10 derniers jours de Strava (ajoutés côté backend).
-export default function ChatCoach({ day, week, program, tomorrow, today }: Props) {
+export default function ChatCoach({ day, week, program, tomorrow, today, onApply }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadChat())
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,8 +43,11 @@ export default function ChatCoach({ day, week, program, tomorrow, today }: Props
     setLoading(true)
 
     try {
-      const reply = await chatCoach(next, { day, week, program, tomorrow, today })
-      const withReply = [...next, { role: 'assistant' as const, content: reply, date: today }]
+      const { reply, adaptation } = await chatCoach(next, { day, week, program, tomorrow, today })
+      const withReply: ChatMessage[] = [
+        ...next,
+        { role: 'assistant', content: reply, date: today, adaptation }
+      ]
       setMessages(withReply)
       saveChat(withReply)
     } catch (e) {
@@ -56,6 +62,16 @@ export default function ChatCoach({ day, week, program, tomorrow, today }: Props
     clearChat()
     setMessages([])
     setError(null)
+  }
+
+  // L'athlète tranche sur une proposition. Rien n'a bougé dans le plan avant ce clic.
+  function decide(index: number, decision: 'applied' | 'ignored') {
+    const target = messages[index]
+    if (!target?.adaptation) return
+    if (decision === 'applied') onApply(target.adaptation)
+    const next = messages.map((m, i) => (i === index ? { ...m, decision } : m))
+    setMessages(next)
+    saveChat(next)
   }
 
   return (
@@ -92,7 +108,7 @@ export default function ChatCoach({ day, week, program, tomorrow, today }: Props
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}
+                className={m.role === 'user' ? 'flex justify-end' : 'flex flex-col items-start gap-2'}
               >
                 <div
                   className={[
@@ -104,6 +120,14 @@ export default function ChatCoach({ day, week, program, tomorrow, today }: Props
                 >
                   <Bubble text={m.content} />
                 </div>
+
+                {m.adaptation && (
+                  <Proposal
+                    adaptation={m.adaptation}
+                    decision={m.decision}
+                    onDecide={(d) => decide(i, d)}
+                  />
+                )}
               </motion.div>
             ))}
           </AnimatePresence>
@@ -170,6 +194,82 @@ export default function ChatCoach({ day, week, program, tomorrow, today }: Props
       </form>
     </div>
   )
+}
+
+// Proposition de modification du plan. Tant que l'athlète n'a pas tranché,
+// le plan n'a pas bougé — c'est le clic sur « Appliquer » qui décide.
+function Proposal({
+  adaptation,
+  decision,
+  onDecide
+}: {
+  adaptation: Adaptation
+  decision?: 'applied' | 'ignored'
+  onDecide: (d: 'applied' | 'ignored') => void
+}) {
+  const stats = [
+    adaptation.distanceKm ? `${adaptation.distanceKm} km` : null,
+    adaptation.elevationM ? `${adaptation.elevationM} m D+` : null
+  ].filter(Boolean)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full rounded-2xl border border-white/15 bg-white/[0.05] p-3.5"
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <Icon name="refresh" size={14} className="text-white/50" />
+        <span className="font-display text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/50">
+          Modifier le programme
+        </span>
+      </div>
+
+      <p className="font-display text-[11px] font-semibold uppercase tracking-widest text-white/45">
+        {frLong(adaptation.date)} · {typeLabel(adaptation.type)}
+      </p>
+      <p className="mt-0.5 text-balance font-display text-[17px] font-semibold leading-tight text-white">
+        {adaptation.titre}
+      </p>
+      <p className="mt-1 text-pretty text-[13px] leading-snug text-white/75">{adaptation.description}</p>
+      {stats.length > 0 && (
+        <p className="mt-1.5 text-[12px] tabular-nums text-white/55">{stats.join(' · ')}</p>
+      )}
+      <p className="mt-1.5 text-pretty text-[12px] leading-snug text-white/45">{adaptation.raison}</p>
+
+      {decision === 'applied' ? (
+        <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-emerald-300">
+          <Icon name="check" size={14} strokeWidth={3} />
+          Appliqué à ton programme
+        </p>
+      ) : decision === 'ignored' ? (
+        <p className="mt-3 text-[12px] text-white/40">Proposition ignorée — ton plan n’a pas bougé.</p>
+      ) : (
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            onClick={() => onDecide('applied')}
+            className="focus-ring flex-1 rounded-full bg-gym px-3 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-ink transition active:scale-[0.98]"
+          >
+            Appliquer
+          </button>
+          <button
+            type="button"
+            onClick={() => onDecide('ignored')}
+            className="focus-ring rounded-full border border-white/15 px-3 py-2 font-display text-[12px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white/80"
+          >
+            Ignorer
+          </button>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+function frLong(iso: string): string {
+  const d = new Date(iso + 'T12:00:00')
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })
 }
 
 // Rendu léger : **gras** + retours à la ligne (le coach répond en conversation).

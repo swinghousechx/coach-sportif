@@ -212,8 +212,84 @@ async function handleChat(request, env) {
       ? `10 DERNIERS JOURS SUR STRAVA :\n${JSON.stringify(recent)}`
       : `STRAVA : aucune activité récente disponible.`)
 
-  const reply = await callClaudeChat(env, system, messages.slice(-12))
-  return json({ reply })
+  return json(await callClaudeChat(env, system, messages.slice(-12)))
+}
+
+// Outil : le coach propose une modification du plan. L'app l'affiche à l'athlète,
+// qui décide de l'appliquer ou non — rien n'est modifié sans sa validation.
+const ADAPT_TOOL = {
+  name: 'adapter_le_programme',
+  description:
+    "Propose la modification d'UNE journée du plan. À n'appeler que si un changement de séance est " +
+    'réellement décidé ou clairement recommandé (allégement, remplacement, décalage, repos, annulation). ' +
+    "Pas pour un simple conseil ou une réponse d'ordre général. Une seule journée par réponse. " +
+    "N'appelle pas cet outil pour proposer une journée déjà passée.",
+  input_schema: {
+    type: 'object',
+    properties: {
+      date: { type: 'string', description: 'Jour à modifier, format YYYY-MM-DD.' },
+      type: {
+        type: 'string',
+        enum: ['gym', 'run', 'long_run', 'hike', 'rest_or_easy', 'gym_and_run'],
+        description: 'Nouveau type de journée.'
+      },
+      titre: {
+        type: 'string',
+        description: 'Titre court de la nouvelle séance. Ex. "Footing easy 45 min", "Repos complet".'
+      },
+      description: {
+        type: 'string',
+        description: "Consigne d'exécution, une phrase courte et concrète."
+      },
+      distanceKm: { type: 'number', description: 'Distance en km si la séance est une course.' },
+      elevationM: { type: 'number', description: 'D+ en mètres si pertinent.' },
+      calories: {
+        type: 'number',
+        description:
+          "Apport calorique du jour, à fournir dès que la charge change nettement (séance annulée, " +
+          "allégée ou alourdie) — sinon l'app garderait l'apport prévu pour la séance d'origine. " +
+          'Repères du plan : ~2600 kcal un jour léger/repos, ~2800 kcal un jour de séance.'
+      },
+      noteNutrition: {
+        type: 'string',
+        description:
+          "Consigne nutrition d'une phrase, cohérente avec la nouvelle séance. À fournir en même temps " +
+          'que calories.'
+      },
+      raison: { type: 'string', description: 'Pourquoi ce changement, une phrase courte.' }
+    },
+    required: ['date', 'type', 'titre', 'description', 'raison']
+  }
+}
+
+async function callClaudeChat(env, system, messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-8',
+      max_tokens: 900,
+      output_config: { effort: env.EFFORT || 'medium' },
+      system,
+      tools: [ADAPT_TOOL],
+      messages: messages.map((m) => ({ role: m.role, content: String(m.content).slice(0, 2000) }))
+    })
+  })
+  if (!res.ok) throw new Error(`anthropic ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  const blocks = data.content || []
+
+  const reply = blocks.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+  const call = blocks.find((b) => b.type === 'tool_use' && b.name === ADAPT_TOOL.name)
+
+  return {
+    reply: reply || (call ? 'Voilà ce que je te propose :' : 'Je n’ai pas réussi à répondre, réessaie.'),
+    adaptation: call ? call.input : undefined
+  }
 }
 
 // Résumé compact des activités récentes (contexte de conversation).
@@ -246,29 +322,13 @@ ADAPTATION — quand il veut changer/décaler une séance, propose UNE option cl
 \
 Principes du plan : course 100% easy (>5:01/km, allure conversation) ; power hiking en montée FC <150 ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
 \
+MODIFIER LE PLAN — tu disposes de l'outil "adapter_le_programme". Utilise-le dès qu'un changement de séance est décidé ou clairement recommandé (alléger, remplacer, décaler, passer en repos, annuler) : l'athlète verra ta proposition et choisira de l'appliquer ou non, donc propose franchement au lieu de décrire vaguement. \
+N'appelle PAS l'outil pour un simple conseil, une réponse générale, ou une séance déjà passée. Une seule journée par réponse : si plusieurs jours bougent, traite le plus urgent et propose le reste au message suivant. \
+Quand tu appelles l'outil, ton texte reste une phrase ou deux qui expliquent le changement — ne répète pas le contenu de la proposition, elle s'affiche toute seule. \
+Si la charge du jour change nettement (séance annulée, allégée, alourdie), renseigne AUSSI calories + noteNutrition : sinon l'app afficherait l'apport prévu pour la séance d'origine, ce qui serait faux. \
+Le contexte te donne le plan DÉJÀ adapté : si une journée porte "adapted", elle a déjà été modifiée, n'en propose pas une copie. \
+\
 STYLE : français, tutoiement, ton direct, chaleureux, honnête — jamais complaisant. Réponse COURTE : 2 à 5 phrases, ~80 mots max, en conversation naturelle (pas de titres, pas de structure markdown lourde, **gras** seulement pour un chiffre ou une consigne clé). Pas de disclaimer générique, pas de "en tant que coach". Va droit au but. Si une info te manque pour bien répondre (où exactement, depuis quand, à l'effort ou au repos), pose UNE question précise.`
-
-async function callClaudeChat(env, system, messages) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-8',
-      max_tokens: 700,
-      output_config: { effort: env.EFFORT || 'medium' },
-      system,
-      messages: messages.map((m) => ({ role: m.role, content: String(m.content).slice(0, 2000) }))
-    })
-  })
-  if (!res.ok) throw new Error(`anthropic ${res.status}: ${await res.text()}`)
-  const data = await res.json()
-  const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
-  return text || 'Je n’ai pas réussi à répondre, réessaie.'
-}
 
 // ---- Claude (le coach) ----
 
