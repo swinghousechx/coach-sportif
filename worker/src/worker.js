@@ -27,6 +27,8 @@ export default {
         return cors(await handleDebrief(request, env), origin)
       if (url.pathname === '/chat' && request.method === 'POST')
         return cors(await handleChat(request, env), origin)
+      if (url.pathname === '/briefing' && request.method === 'POST')
+        return cors(await handleBriefing(request, env), origin)
       if (url.pathname === '/profil') return cors(await handleProfil(request, env), origin)
       return cors(json({ error: 'not_found' }, 404), origin)
     } catch (e) {
@@ -204,6 +206,78 @@ function fmtDuration(s) {
   const m = Math.floor((s % 3600) / 60)
   return h ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`
 }
+
+// ---- Briefing (le troisième temps : AVANT la séance) ----
+//
+// Le débrief regarde en arrière, le chat attend qu'on lui parle. Le briefing est le
+// moment où un coach sert le plus : au réveil, avant de partir. Il ne récite pas le
+// plan — l'app l'affiche déjà — il dit comment aborder CETTE séance aujourd'hui,
+// compte tenu du carnet, de la charge et de l'état du jour.
+//
+// Pas de cache KV : il dépend de l'état du jour, qui change dans la journée. L'app
+// le garde en local jusqu'à ce que la séance ou l'état bougent.
+
+async function handleBriefing(request, env) {
+  if (env.APP_SECRET && request.headers.get('x-app-secret') !== env.APP_SECRET)
+    return json({ error: 'unauthorized' }, 401)
+
+  const body = await request.json().catch(() => ({}))
+  const { planned, context } = body
+  if (!planned) return json({ error: 'bad_request' }, 400)
+
+  const token = await getAccessToken(env)
+  const recent = token ? await recentActivities(token, 14) : []
+
+  const userContent =
+    `SÉANCE DU JOUR, À VENIR (JSON) :\n${JSON.stringify(planned)}\n\n` +
+    `CONTEXTE (JSON) :\n${JSON.stringify(context || {})}\n\n` +
+    (recent.length
+      ? `14 DERNIERS JOURS SUR STRAVA (JSON) :\n${JSON.stringify(recent)}`
+      : `STRAVA : aucune activité récente disponible.`)
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-8',
+      max_tokens: 1200,
+      output_config: { effort: env.EFFORT || 'medium' },
+      system: BRIEFING_PROMPT,
+      tools: [ADAPT_TOOL, CARNET_TOOL],
+      messages: [{ role: 'user', content: userContent }]
+    })
+  })
+  if (!res.ok) throw new Error(`anthropic ${res.status}: ${await res.text()}`)
+  const data = await res.json()
+  const blocks = data.content || []
+
+  const adapt = blocks.find((b) => b.type === 'tool_use' && b.name === ADAPT_TOOL.name)
+  const carnet = blocks.find((b) => b.type === 'tool_use' && b.name === CARNET_TOOL.name)
+
+  return json({
+    briefing: blocks.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim() ||
+      'Briefing indisponible, réessaie.',
+    adaptation: adapt ? adapt.input : undefined,
+    carnet: carnet ? carnet.input : undefined
+  })
+}
+
+const BRIEFING_PROMPT = `Tu es le coach personnel de l'athlète — le meilleur du monde en endurance (trail/marathon) et en force. \
+Il prépare un marathon trail 42K/900 D+, objectif sub-4h. Il ouvre son app AVANT sa séance : dis-lui comment l'aborder AUJOURD'HUI. \
+\
+NE RÉCITE PAS LE PLAN. L'app affiche déjà la séance, ses cibles chiffrées et sa nutrition juste à côté — les répéter ne sert à rien et te décrédibilise. Ton travail est ce que le plan NE dit pas : ce qui change aujourd'hui, pour lui, à cause de son état, de sa charge récente ou de ce que tu as noté. \
+\
+CE QUE TU REGARDES, dans cet ordre : le "carnet" (tes notes des jours précédents — une douleur ouverte se reprend AVANT la séance, pas après) ; "etatDuJour" (sommeil, fatigue 1-5, FC repos) ; la charge des 14 derniers jours et "profil.volume8SemainesKm" (un enchaînement lourd ou un bond de volume change la façon d'aborder le jour) ; "adherence" ; et le "profil" pour parler en SES chiffres — zones FC recalibrées, allure easy médiane. Ne recalcule jamais ses zones, n'utilise pas 220-âge. \
+\
+SI RIEN NE CLOCHE, DIS-LE EN UNE PHRASE. Un bon coach ne fabrique pas une consigne pour justifier sa présence. « Journée simple, rien à signaler, déroule » est une réponse valable et honnête. \
+\
+Si l'état du jour ou la charge imposent d'alléger, utilise l'outil "adapter_le_programme" : l'athlète verra ta proposition et choisira. Si quelque chose mérite d'être suivi dans le temps, note-le au carnet — mais sois avare, souvent il n'y a rien à noter. \
+\
+STYLE : français, tutoiement, direct, chaleureux, honnête — jamais complaisant. TRÈS COURT : 2 à 4 phrases, ~70 mots maximum. Pas de titres, pas de listes, pas de structure markdown lourde ; **gras** seulement sur un chiffre ou une consigne clé. Pas d'intro générique, pas de « en tant que coach ». Va droit au but.`
 
 // ---- Profil physiologique (dérivé des vraies séances Strava) ----
 //

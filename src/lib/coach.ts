@@ -125,6 +125,82 @@ export async function fetchDebrief(
   return { ...(await r.json()), planKey }
 }
 
+// ---- Briefing du jour (avant la séance) ----
+
+export interface BriefingResult {
+  briefing: string
+  adaptation?: Adaptation
+  carnet?: CarnetOps
+  /** Séance prévue + état du jour au moment du brief : si ça bouge, le brief est caduc. */
+  key?: string
+}
+
+/**
+ * Le brief dépend de la séance ET de l'état du jour. Saisir « mal dormi » après coup
+ * doit invalider un brief écrit quand tout allait bien — d'où l'état dans la clé.
+ */
+function briefingKey(day: Day): string {
+  const etat = loadEtat(day.date)
+  return `${planFingerprint(day)}:${etat ? `${etat.sommeil ?? '-'}${etat.fatigue ?? '-'}${etat.hrRest ?? '-'}` : '-'}`
+}
+
+export async function fetchBriefing(
+  day: Day,
+  week: Week,
+  program: Program
+): Promise<BriefingResult> {
+  if (!API) throw new Error('coach non configuré')
+  const key = briefingKey(day)
+  const r = await fetch(`${API}/briefing`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(SECRET ? { 'x-app-secret': SECRET } : {}) },
+    body: JSON.stringify({
+      planned: day,
+      context: {
+        aujourdhui: day.date,
+        raceDate: program.raceDate,
+        raceInfo: program.raceInfo,
+        semaine: {
+          numero: week.weekNumber,
+          phase: week.phase,
+          muscuLegsPhase: week.muscuLegsPhase
+        },
+        semaineEnCours: week.days,
+        etatDuJour: loadEtat(day.date) ?? undefined,
+        profil: profilContext(),
+        adherence: adherenceContext(program, day.date),
+        carnet: carnetContext()
+      }
+    })
+  })
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}))
+    throw new Error(detail.error || `erreur ${r.status}`)
+  }
+  return { ...(await r.json()), key }
+}
+
+const BRIEFING_KEY = 'coach:briefings'
+
+export function loadBriefing(day: Day): BriefingResult | null {
+  try {
+    const all = JSON.parse(localStorage.getItem(BRIEFING_KEY) || '{}')
+    const hit = all[day.date]
+    return hit && hit.key === briefingKey(day) ? hit : null
+  } catch {
+    return null
+  }
+}
+
+export function saveBriefing(date: string, r: BriefingResult): void {
+  try {
+    // Un seul brief conservé : celui du jour. Les anciens n'ont aucune valeur.
+    localStorage.setItem(BRIEFING_KEY, JSON.stringify({ [date]: r }))
+  } catch {
+    /* ignore quota */
+  }
+}
+
 // ---- Profil physiologique (mesuré sur Strava) ----
 
 const PROFIL_KEY = 'coach:profil'
