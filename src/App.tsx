@@ -7,7 +7,6 @@ import { applyAdaptations, loadAdaptations, saveAdaptations } from './lib/adapt'
 import { loadCarnet, type CarnetEntry } from './lib/carnet'
 import Tabs, { type TabKey } from './components/Tabs'
 import RaceBanner from './components/RaceBanner'
-import Icon from './components/Icon'
 import WeekHeader from './components/WeekHeader'
 import DayCard from './components/DayCard'
 import ProgramOverview from './components/ProgramOverview'
@@ -142,18 +141,9 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <PullToRefresh onRefresh={() => window.location.reload()}>
+      {/* Pas de bouton « rafraîchir » : le tirer-pour-rafraîchir le remplace sur mobile,
+          et Cmd+R le fait sur ordinateur. Il n'occupait plus qu'un coin. */}
       <div className="mx-auto min-h-full max-w-md px-4 pb-10 pt-4">
-        <div className="mb-2 flex justify-end">
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            aria-label="Rafraîchir l'app"
-            className="focus-ring rounded-full p-[13px] text-white/60 transition hover:text-white/80 active:scale-90"
-          >
-            <Icon name="refresh" size={18} />
-          </button>
-        </div>
-
         <RaceBanner race={program.raceInfo} raceDate={program.raceDate} />
 
         <Tabs value={tab} onChange={setTab} />
