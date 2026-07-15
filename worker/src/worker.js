@@ -136,9 +136,10 @@ async function handleDebrief(request, env) {
   if (!token) return json({ error: 'not_connected' }, 409)
 
   // Récupère TOUTES les séances du jour (muscu ET/OU course).
-  const { weight, run } = await findActivities(token, date)
+  const { weights, run } = await findActivities(token, date)
   const actuals = []
-  if (weight) actuals.push(activitySummary(await enrichActivity(token, weight.id), 'muscu'))
+  const muscu = await mergeWeights(token, weights)
+  if (muscu) actuals.push(muscu)
   if (run) {
     const s = activitySummary(await enrichActivity(token, run.id), 'course')
     // Le temps en zone remplace la FC moyenne comme preuve : il faut les zones de
@@ -176,9 +177,36 @@ async function findActivities(token, date) {
   const acts = await res.json()
   const sameDay = acts.filter((a) => a.start_date_local?.slice(0, 10) === date)
   return {
-    weight: sameDay.find((a) => WEIGHT_TYPES.includes(a.sport_type)) || null,
+    // TOUTES les activités de force du jour, pas la première : Hevy et la Garmin
+    // postent chacune la leur. Hevy porte les charges (description) mais pas le
+    // cardio ; la Garmin l'inverse. En prendre une au hasard perdait l'autre.
+    weights: sameDay.filter((a) => WEIGHT_TYPES.includes(a.sport_type)),
     run: sameDay.find((a) => RUN_TYPES.includes(a.sport_type)) || null
   }
+}
+
+/**
+ * Une seule séance muscu à débriefer, reconstituée depuis ce que chaque source sait.
+ * Hevy = les charges (seul à les avoir, c'est une app de muscu). Garmin = la FC et
+ * la durée réelle. Tant qu'on lance les deux, aucune n'est complète toute seule.
+ */
+async function mergeWeights(token, weights) {
+  if (!weights.length) return null
+
+  const full = []
+  for (const w of weights) full.push(await enrichActivity(token, w.id))
+
+  const avecCharges = full.find((a) => parseHevy(a?.description || '').length > 0)
+  const avecCardio = full.find((a) => a?.average_heartrate > 0)
+  const base = avecCardio || avecCharges || full[0]
+  if (!base) return null
+
+  const s = activitySummary(base, 'muscu')
+  if (avecCharges && avecCharges !== base) {
+    s.description = avecCharges.description
+    s.sources = 'FC et durée depuis la montre, charges depuis Hevy (deux activités Strava fusionnées)'
+  }
+  return s
 }
 
 /**
@@ -384,12 +412,14 @@ async function handleProfil(request, env) {
   const acts = await allActivities(token, after)
   const runs = acts.filter((a) => RUN_TYPES.includes(a.sport_type) && a.distance > 2000)
 
-  // Force : 8 semaines suffisent pour voir une progression ou un plateau, et
-  // chaque séance coûte un appel Strava (la description n'est pas dans la liste).
+  // Force : 8 semaines suffisent pour voir une progression ou un plateau, et chaque
+  // séance coûte un appel Strava (la description n'est pas dans la liste).
+  // Plafond à 40 et non 24 : si la montre double chaque séance Hevy, la moitié des
+  // activités n'a aucune description — 24 ne couvriraient plus que 4 semaines.
   const weights = acts
     .filter((a) => WEIGHT_TYPES.includes(a.sport_type) && sinceDays(a.start_date_local) <= 56)
     .sort((a, b) => a.start_date_local.localeCompare(b.start_date_local))
-    .slice(-24)
+    .slice(-40)
 
   const profil = buildProfil(runs, days)
   profil.force = await buildForce(token, weights)
