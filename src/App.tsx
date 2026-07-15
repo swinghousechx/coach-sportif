@@ -4,6 +4,7 @@ import type { Adaptation, Program } from './types'
 import { currentWeekIndex, todayISO } from './lib/week'
 import { loadStoredProgram, saveProgram, loadDoneOverrides, saveDoneOverrides } from './lib/storage'
 import { applyAdaptations, loadAdaptations, saveAdaptations } from './lib/adapt'
+import { loadCarnet, type CarnetEntry } from './lib/carnet'
 import Tabs, { type TabKey } from './components/Tabs'
 import RaceBanner from './components/RaceBanner'
 import Icon from './components/Icon'
@@ -24,6 +25,7 @@ export default function App() {
   const [tab, setTab] = useState<TabKey>('week')
   const [overrides, setOverrides] = useState<Record<string, boolean>>(() => loadDoneOverrides())
   const [adaptations, setAdaptations] = useState<Record<string, Adaptation>>(() => loadAdaptations())
+  const [carnet, setCarnet] = useState<CarnetEntry[]>(() => loadCarnet())
 
   const dayRefs = useRef<(HTMLElement | null)[]>([])
   const scrolledRef = useRef(false)
@@ -176,6 +178,7 @@ export default function App() {
                   done={isDone(d.date)}
                   onToggle={() => toggleDone(d.date)}
                   onRevert={() => revertAdaptation(d.date)}
+                  onCarnet={() => setCarnet(loadCarnet())}
                   week={currentWeek}
                   program={program}
                   ref={(el) => {
@@ -192,7 +195,13 @@ export default function App() {
         )}
 
         {tab === 'reco' && (
-          <RecoTab program={program} todayDate={today} onApplyAdaptation={applyAdaptation} />
+          <RecoTab
+            program={program}
+            todayDate={today}
+            onApplyAdaptation={applyAdaptation}
+            carnet={carnet}
+            onCarnetChange={() => setCarnet(loadCarnet())}
+          />
         )}
 
         <div className="mt-6">

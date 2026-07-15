@@ -1,5 +1,7 @@
 import type { Adaptation, Day, Program, Week } from '../types'
 import { computeZones, fmtPace, medianHrRest, type Profil } from './zones'
+import { loadDoneOverrides } from './storage'
+import { carnetContext, type CarnetOps } from './carnet'
 
 // Client du backend "Coach" (Cloudflare Worker). Tout est optionnel :
 // si VITE_COACH_API n'est pas défini, la fonctionnalité reste masquée et l'app
@@ -45,6 +47,8 @@ export interface DebriefResult {
   cached?: boolean
   /** Empreinte de la séance prévue au moment du débrief (voir planFingerprint). */
   planKey?: string
+  /** Notes que le coach veut porter à son carnet (absent d'un débrief servi du cache). */
+  carnet?: CarnetOps
 }
 
 /** Normalise vers un tableau (gère l'ancienne forme `activity`). */
@@ -105,7 +109,12 @@ export async function fetchDebrief(
         etatDuJour: loadEtat(day.date) ?? undefined,
         // Mêmes zones/allures que celles affichées à l'athlète : un débrief qui juge
         // « FC trop haute » doit le faire sur SES zones, pas sur une intuition.
-        profil: profilContext()
+        profil: profilContext(),
+        // Sans la semaine ni l'adhérence, le débrief jugeait une séance hors de tout
+        // contexte — le contraire du travail d'un coach.
+        semaineEnCours: week.days,
+        adherence: adherenceContext(program, day.date),
+        carnet: carnetContext()
       }
     })
   })
@@ -152,6 +161,9 @@ export function profilContext() {
     easyPace: p.easyPaceSec ? `${fmtPace(p.easyPaceSec)}/km` : undefined,
     easyHrMedian: p.easyHrMedian,
     volumeHebdoKm: p.weeklyKm,
+    // La tendance était calculée et affichée, mais jamais transmise : sans elle le
+    // coach ne peut pas voir un saut de charge, ce qui est son premier travail.
+    volume8SemainesKm: p.weeklySeries,
     plusLongueKm: p.longestKm,
     zonesFc: zones
       ? {
@@ -159,6 +171,32 @@ export function profilContext() {
           ...Object.fromEntries(zones.zones.map((z) => [z.key, `${z.lo}-${z.hi} bpm`]))
         }
       : undefined
+  }
+}
+
+/**
+ * Ce que l'athlète a réellement fait du plan. Les coches ne quittaient jamais le
+ * téléphone : le coach débriefait sans savoir si la séance de la veille avait été
+ * sautée. On ne compte que les jours passés — cocher demain n'a pas de sens.
+ */
+export function adherenceContext(program: Program, today: string) {
+  const overrides = loadDoneOverrides()
+  const done = (d: Day) => (d.date in overrides ? overrides[d.date] : d.status === 'done')
+
+  const days = program.weeks.flatMap((w) => w.days).filter((d) => d.date < today)
+  if (!days.length) return undefined
+
+  const last28 = days.filter((d) => (Date.parse(today) - Date.parse(d.date)) / 86400_000 <= 28)
+  const manquees = last28
+    .filter((d) => !done(d) && d.type !== 'rest_or_easy')
+    .map((d) => `${d.label} ${d.date.slice(8, 10)}/${d.date.slice(5, 7)} — ${d.sessionName ?? d.description ?? d.type}`)
+
+  return {
+    depuisLeDebut: `${days.filter(done).length}/${days.length} jours passés cochés`,
+    surLes4DernieresSemaines: `${last28.filter(done).length}/${last28.length}`,
+    seancesNonCochees: manquees.slice(-6),
+    // Une coche est déclarative : elle dit l'intention, Strava dit le réel.
+    remarque: 'Coches saisies à la main — recoupe-les avec Strava avant de conclure.'
   }
 }
 
@@ -225,7 +263,7 @@ export function clearChat(): void {
 export async function chatCoach(
   messages: ChatMessage[],
   ctx: { day: Day; week: Week; program: Program; tomorrow?: Day; today: string }
-): Promise<{ reply: string; adaptation?: Adaptation }> {
+): Promise<{ reply: string; adaptation?: Adaptation; carnet?: CarnetOps }> {
   if (!API) throw new Error('coach non configuré')
 
   const payload = messages.slice(-CHAT_SEND).map((m) => ({
@@ -253,7 +291,10 @@ export async function chatCoach(
         semaineEnCours: ctx.week.days,
         etatDuJour: loadEtat(ctx.today) ?? undefined,
         // Le coach doit citer les MÊMES chiffres que ceux affichés sur les séances.
-        profil: profilContext()
+        profil: profilContext(),
+        adherence: adherenceContext(ctx.program, ctx.today),
+        // Sa mémoire : sans elle il redécouvre l'athlète à chaque message.
+        carnet: carnetContext()
       }
     })
   })
@@ -262,7 +303,11 @@ export async function chatCoach(
     throw new Error(detail.error || `erreur ${r.status}`)
   }
   const data = await r.json()
-  return { reply: data.reply as string, adaptation: data.adaptation as Adaptation | undefined }
+  return {
+    reply: data.reply as string,
+    adaptation: data.adaptation as Adaptation | undefined,
+    carnet: data.carnet as CarnetOps | undefined
+  }
 }
 
 function frDate(iso: string): string {

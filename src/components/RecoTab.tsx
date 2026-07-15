@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import type { Adaptation, Program } from '../types'
+import type { CarnetEntry } from '../lib/carnet'
 import { buildReco, type Reco } from '../lib/reco'
 import { coachStatus, isCoachEnabled, stravaConnectUrl } from '../lib/coach'
+import CarnetCard from './CarnetCard'
 import ChatCoach from './ChatCoach'
 import EtatDuJour from './EtatDuJour'
 import ProfilCard from './ProfilCard'
@@ -15,11 +17,13 @@ interface Props {
   program: Program
   todayDate: string
   onApplyAdaptation: (a: Adaptation) => void
+  carnet: CarnetEntry[]
+  onCarnetChange: () => void
 }
 
 // Onglet Coach : synchro Strava, état du jour, conversation avec le coach,
 // et briefing de la séance du jour à la demande.
-export default function RecoTab({ program, todayDate, onApplyAdaptation }: Props) {
+export default function RecoTab({ program, todayDate, onApplyAdaptation, carnet, onCarnetChange }: Props) {
   const reduce = useReducedMotion()
   const [state, setState] = useState<'idle' | 'analyzing' | 'done'>('idle')
 
@@ -71,8 +75,12 @@ export default function RecoTab({ program, todayDate, onApplyAdaptation }: Props
           tomorrow={resolved.tomorrow}
           today={todayDate}
           onApply={onApplyAdaptation}
+          onCarnet={onCarnetChange}
         />
       )}
+
+      {/* Ce que le coach retient de toi — visible, effaçable. */}
+      {isCoachEnabled() && <CarnetCard entries={carnet} onChange={onCarnetChange} />}
 
       {/* Analyse à la demande */}
       {state !== 'done' ? (

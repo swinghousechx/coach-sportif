@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { Adaptation, Day, Program, Week } from '../types'
 import { chatCoach, clearChat, loadChat, saveChat, type ChatMessage } from '../lib/coach'
 import { typeLabel } from '../lib/dayMeta'
+import { applyCarnetOps } from '../lib/carnet'
 import Icon from './Icon'
 import { IconBadge } from './ui'
 
@@ -14,6 +15,8 @@ interface Props {
   today: string
   /** Applique une adaptation validée par l'athlète (remonte jusqu'à App). */
   onApply: (a: Adaptation) => void
+  /** Le coach vient d'écrire à son carnet — prévient App pour rafraîchir l'affichage. */
+  onCarnet: () => void
 }
 
 // Amorces : les 3 cas réels (douleur / fatigue / adaptation).
@@ -21,7 +24,7 @@ const SUGGESTIONS = ['J’ai mal quelque part', 'Je suis cuit aujourd’hui', 'J
 
 // Conversation avec le coach : il connaît le plan, la séance du jour,
 // l'état du jour et les 10 derniers jours de Strava (ajoutés côté backend).
-export default function ChatCoach({ day, week, program, tomorrow, today, onApply }: Props) {
+export default function ChatCoach({ day, week, program, tomorrow, today, onApply, onCarnet }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadChat())
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,7 +47,12 @@ export default function ChatCoach({ day, week, program, tomorrow, today, onApply
     setLoading(true)
 
     try {
-      const { reply, adaptation } = await chatCoach(next, { day, week, program, tomorrow, today })
+      const { reply, adaptation, carnet } = await chatCoach(next, { day, week, program, tomorrow, today })
+      // La mémoire du coach s'écrit tout de suite : elle vaut pour le message suivant.
+      if (carnet) {
+        applyCarnetOps(carnet, today)
+        onCarnet()
+      }
       const withReply: ChatMessage[] = [
         ...next,
         { role: 'assistant', content: reply, date: today, adaptation }

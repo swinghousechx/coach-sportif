@@ -18,6 +18,8 @@ interface Props {
   onToggle: () => void
   /** Rétablit la séance d'origine si la journée a été adaptée avec le coach. */
   onRevert?: () => void
+  /** Le coach a noté au carnet en débriefant cette journée. */
+  onCarnet?: () => void
   week?: Week
   program?: Program
 }
@@ -25,7 +27,7 @@ interface Props {
 const EASE_EXPO = [0.16, 1, 0.3, 1] as const
 
 const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
-  { day, index, isToday, done, onToggle, onRevert, week, program },
+  { day, index, isToday, done, onToggle, onRevert, onCarnet, week, program },
   ref
 ) {
   // Replié par défaut, sauf le jour même et le jour de course : la semaine se lit d'un coup d'œil.
@@ -231,7 +233,7 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
           {/* Débrief IA de la séance réelle (Strava) — sur chaque jour, repos compris :
               un jour « repos ou footing » se débriefe aussi (footing fait ? repos tenu ?). */}
           {isCoachEnabled() && week && program && (
-            <CoachDebrief day={day} week={week} program={program} />
+            <CoachDebrief day={day} week={week} program={program} onCarnet={onCarnet} />
           )}
         </div>
       </div>

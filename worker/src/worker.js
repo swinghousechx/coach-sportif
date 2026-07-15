@@ -138,16 +138,21 @@ async function handleDebrief(request, env) {
   if (weight) actuals.push(activitySummary(await enrichActivity(token, weight.id), 'muscu'))
   if (run) actuals.push(activitySummary(await enrichActivity(token, run.id), 'course'))
 
-  const debrief = await callClaude(env, { planned, context, actuals })
+  // Les 14 derniers jours : un débrief qui ne voit qu'une journée juge une séance
+  // hors de sa charge, de sa tendance et de son enchaînement.
+  const recent = await recentActivities(token, 14)
+
+  const { debrief, carnet } = await callClaude(env, { planned, context, actuals, recent })
   const payload = { debrief, activities: actuals }
 
   // « Aucune activité trouvée » est une réponse datée, pas un verdict : la séance peut
   // très bien arriver dans l'heure. La figer 120 jours donnerait un coach qui répète
   // « tu n'as rien fait » après coup. On ne met en cache qu'un débrief qui porte sur du réel.
+  // Le carnet reste HORS du cache : une relecture ne doit pas re-noter la même chose.
   if (cacheKey && actuals.length)
     await env.TOKENS.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 * 120 })
 
-  return json({ ...payload, cached: false })
+  return json({ ...payload, carnet, cached: false })
 }
 
 // Première activité muscu + première activité course de la date.
@@ -329,6 +334,46 @@ async function handleChat(request, env) {
   return json(await callClaudeChat(env, system, messages.slice(-12)))
 }
 
+// Outil : la mémoire longue du coach. Sans elle il redécouvre son athlète à chaque
+// appel — un rapport, pas un suivi. L'athlète lit ce carnet et peut l'effacer.
+const CARNET_TOOL = {
+  name: 'noter_au_carnet',
+  description:
+    "Consigne au carnet de bord ce qui doit SURVIVRE à cet échange : une douleur qui apparaît, " +
+    'un schéma que tu observes sur plusieurs séances, une décision prise ensemble, un objectif ' +
+    "intermédiaire. N'y mets PAS un détail du jour, ni ce qui est déjà lisible dans Strava, le " +
+    'plan ou le profil — le carnet sert à ce que les données ne disent pas. Clos une entrée ' +
+    'devenue caduque (douleur résolue, schéma corrigé, décision périmée). Reste bref : une note ' +
+    'est une phrase. Ne re-note jamais une entrée déjà ouverte.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      notes: {
+        type: 'array',
+        description: 'Nouvelles entrées. Laisse vide si rien de durable ne ressort.',
+        items: {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['douleur', 'schema', 'decision', 'objectif'],
+              description:
+                'douleur = gêne/blessure suivie ; schema = tendance répétée ; decision = choix acté ; objectif = cible intermédiaire.'
+            },
+            text: { type: 'string', description: 'Une phrase, factuelle et datée dans les faits.' }
+          },
+          required: ['type', 'text']
+        }
+      },
+      clore: {
+        type: 'array',
+        description: "Identifiants (ex. « c3 ») des entrées ouvertes devenues caduques.",
+        items: { type: 'string' }
+      }
+    }
+  }
+}
+
 // Outil : le coach propose une modification du plan. L'app l'affiche à l'athlète,
 // qui décide de l'appliquer ou non — rien n'est modifié sans sa validation.
 const ADAPT_TOOL = {
@@ -389,7 +434,7 @@ async function callClaudeChat(env, system, messages) {
       max_tokens: 900,
       output_config: { effort: env.EFFORT || 'medium' },
       system,
-      tools: [ADAPT_TOOL],
+      tools: [ADAPT_TOOL, CARNET_TOOL],
       messages: messages.map((m) => ({ role: m.role, content: String(m.content).slice(0, 2000) }))
     })
   })
@@ -399,10 +444,12 @@ async function callClaudeChat(env, system, messages) {
 
   const reply = blocks.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
   const call = blocks.find((b) => b.type === 'tool_use' && b.name === ADAPT_TOOL.name)
+  const carnet = blocks.find((b) => b.type === 'tool_use' && b.name === CARNET_TOOL.name)
 
   return {
     reply: reply || (call ? 'Voilà ce que je te propose :' : 'Je n’ai pas réussi à répondre, réessaie.'),
-    adaptation: call ? call.input : undefined
+    adaptation: call ? call.input : undefined,
+    carnet: carnet ? carnet.input : undefined
   }
 }
 
@@ -442,6 +489,9 @@ Quand tu appelles l'outil, ton texte reste une phrase ou deux qui expliquent le 
 Si la charge du jour change nettement (séance annulée, allégée, alourdie), renseigne AUSSI calories + noteNutrition : sinon l'app afficherait l'apport prévu pour la séance d'origine, ce qui serait faux. \
 Le contexte te donne le plan DÉJÀ adapté : si une journée porte "adapted", elle a déjà été modifiée, n'en propose pas une copie. \
 \
+\
+CARNET DE BORD — c'est ta mémoire. Le contexte contient "carnet" : ce que TU as noté les jours précédents. Lis-le AVANT de répondre et sers-t'en : reviens sur une douleur ouverte ("ton genou, ça donne quoi depuis mardi ?"), constate qu'un schéma persiste ou se corrige, tiens compte d'une décision déjà prise. Un athlète doit sentir que tu te souviens de lui. \
+Avec l'outil "noter_au_carnet", consigne ce qui doit SURVIVRE à cet échange, et clos ce qui est réglé. Sois avare : une note par échange au maximum, souvent aucune. Un carnet noyé sous les détails ne sert plus à rien. N'y mets jamais ce que Strava, le plan ou le profil disent déjà. \
 SES CHIFFRES — le contexte contient un "profil" mesuré sur ses vraies sorties Strava : FC max observée, FC repos, zones FC recalibrées, allure easy médiane, volume hebdo. Ce sont exactement les chiffres AFFICHÉS dans son app, sur chaque séance : raisonne et parle avec CEUX-LÀ. Ne recalcule jamais ses zones de tête, n'utilise pas 220-âge, ne cite pas une FC cible qui contredirait ses zones. Profil absent : dis-le, n'invente pas de repère. \
 \
 STYLE : français, tutoiement, ton direct, chaleureux, honnête — jamais complaisant. Réponse COURTE : 2 à 5 phrases, ~80 mots max, en conversation naturelle (pas de titres, pas de structure markdown lourde, **gras** seulement pour un chiffre ou une consigne clé). Pas de disclaimer générique, pas de "en tant que coach". Va droit au but. Si une info te manque pour bien répondre (où exactement, depuis quand, à l'effort ou au repos), pose UNE question précise.`
@@ -454,15 +504,26 @@ IMPORTANT : il peut y avoir DEUX séances le même jour (muscu ET course) — da
 Pour la muscu, les charges/séries sont dans le champ description de l'activité (export Hevy) : exploite-les. \
 Principes du plan : course 100% easy (>5:01/km, allure conversation) ; power hiking en montée avec FC <150 bpm ; jambes en maintenance dès la semaine 4 (charges figées) ; le haut du corps continue de progresser. \
 Le contexte contient un "profil" mesuré sur ses vraies sorties Strava (FC max observée, FC repos, zones FC recalibrées, allure easy médiane) : ce sont les cibles affichées sur sa séance. Juge le réalisé par rapport à CES zones — « FC trop haute » ne se dit que si c'est vrai au regard de SES zones, pas d'une intuition ni d'un 220-âge. \
+\
+\
+CARNET DE BORD — c'est ta mémoire. Le contexte contient "carnet" : ce que TU as noté les jours précédents. Lis-le AVANT de répondre et sers-t'en : reviens sur une douleur ouverte ("ton genou, ça donne quoi depuis mardi ?"), constate qu'un schéma persiste ou se corrige, tiens compte d'une décision déjà prise. Un athlète doit sentir que tu te souviens de lui. \
+Avec l'outil "noter_au_carnet", consigne ce qui doit SURVIVRE à cet échange, et clos ce qui est réglé. Sois avare : une note par échange au maximum, souvent aucune. Un carnet noyé sous les détails ne sert plus à rien. N'y mets jamais ce que Strava, le plan ou le profil disent déjà. \
+NE DÉBRIEFE JAMAIS UNE JOURNÉE ISOLÉE. Tu reçois aussi "semaineEnCours", "adherence", "profil.volume8SemainesKm" et les 14 derniers jours Strava : la séance du jour ne se juge que dans cet enchaînement. Regarde la CHARGE (un bond de plus de ~10 % du volume hebdo d'une semaine sur l'autre est un risque à nommer, chiffres à l'appui), la RÉPÉTITION (troisième easy d'affilée au-dessus de la Z2 = un schéma, pas un accident) et l'ADHÉRENCE (séances non cochées : dis-le sans moraliser, et rappelle ce que ça coûte pour l'objectif). \
+L'adhérence est déclarative : une case non cochée peut être une séance faite sans la cocher. Si Strava montre l'activité, fie-toi à Strava. \
+Une moyenne masque : une allure moyenne sur du D+ ou une FC moyenne sur une sortie vallonnée ne prouvent pas grand-chose. Reste prudent sur ce qu'une moyenne permet d'affirmer. \
 Si le contexte contient un "etatDuJour" (sommeil bien/moyen/mauvais, fatigue 1-5, FC repos en bpm), PONDÈRE tes conseils selon la récup : FC repos élevée vs d'habitude, sommeil mauvais ou fatigue ≥4 → recommande d'alléger / prioriser la récup ; bon état → tu peux pousser normalement. \
 Écris en français, tutoiement, ton direct et motivant mais honnête, concret et chiffré. Structure courte en markdown : \
 une ligne **Bilan** (verdict global de la journée), puis **Ce qui va** (2-4 puces), **À surveiller** (1-3 puces si pertinent), **Pour la suite** (1-2 conseils actionnables). \
 S'il y a deux séances, mentionne explicitement chacune (muscu / course). Si aucune activité Strava n'est trouvée, dis-le franchement et rappelle ce qui était prévu. Pas d'intro générique. Maximum ~200 mots.`
 
-async function callClaude(env, { planned, context, actuals }) {
+/** Rédige le débrief. Peut aussi noter au carnet — c'est en débriefant qu'un schéma se voit. */
+async function callClaude(env, { planned, context, actuals, recent }) {
   const userContent =
     `SÉANCE PRÉVUE (JSON) :\n${JSON.stringify(planned)}\n\n` +
     `CONTEXTE PLAN (JSON) :\n${JSON.stringify(context || {})}\n\n` +
+    (recent?.length
+      ? `14 DERNIERS JOURS SUR STRAVA (JSON) :\n${JSON.stringify(recent)}\n\n`
+      : '') +
     (actuals.length
       ? `SÉANCE(S) RÉALISÉE(S) — Strava (JSON, ${actuals.length}) :\n${JSON.stringify(actuals)}`
       : `SÉANCE RÉALISÉE : aucune activité Strava trouvée pour cette date.`)
@@ -479,13 +540,16 @@ async function callClaude(env, { planned, context, actuals }) {
       max_tokens: 1400,
       output_config: { effort: env.EFFORT || 'medium' },
       system: SYSTEM_PROMPT,
+      tools: [CARNET_TOOL],
       messages: [{ role: 'user', content: userContent }]
     })
   })
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${await res.text()}`)
   const data = await res.json()
-  const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
-  return text || 'Débrief indisponible.'
+  const blocks = data.content || []
+  const text = blocks.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+  const carnet = blocks.find((b) => b.type === 'tool_use' && b.name === CARNET_TOOL.name)
+  return { debrief: text || 'Débrief indisponible.', carnet: carnet ? carnet.input : undefined }
 }
 
 // ---- Helpers ----

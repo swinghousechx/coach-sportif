@@ -9,16 +9,19 @@ import {
   saveDebrief,
   type DebriefResult
 } from '../lib/coach'
+import { applyCarnetOps } from '../lib/carnet'
 import Icon from './Icon'
 
 interface Props {
   day: Day
   week: Week
   program: Program
+  /** Le coach a noté au carnet en débriefant — remonte jusqu'à App. */
+  onCarnet?: () => void
 }
 
 // Bouton "Débrief du coach" + rendu du débrief IA (données Strava réelles).
-export default function CoachDebrief({ day, week, program }: Props) {
+export default function CoachDebrief({ day, week, program, onCarnet }: Props) {
   // Le débrief en cache n'est repris que s'il porte sur la séance actuellement prévue.
   const planKey = planFingerprint(day)
   const [result, setResult] = useState<DebriefResult | null>(() => loadDebrief(day.date, planKey))
@@ -32,6 +35,11 @@ export default function CoachDebrief({ day, week, program }: Props) {
     try {
       const r = await fetchDebrief(day, week, program, force)
       setResult(r)
+      // Un débrief du cache ne renvoie pas de carnet : relire ne doit pas re-noter.
+      if (r.carnet) {
+        applyCarnetOps(r.carnet, day.date)
+        onCarnet?.()
+      }
       // Un débrief sans activité trouvée n'est pas une conclusion : la séance peut
       // encore arriver. On l'affiche sans le figer, pour ne pas le ressortir demain.
       if (debriefActivities(r).length) saveDebrief(day.date, r)
