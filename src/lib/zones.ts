@@ -186,8 +186,8 @@ export function targetsFor(
     t.push({
       icon: 'mountain',
       label: 'Montées',
-      value: `Power hike > 8 %`,
-      hint: `Marche dès que la FC dépasse ${HIKE_HR_CEILING} bpm. Relâché en descente.`
+      value: 'Power hike',
+      hint: `Dès 8 % de pente, et dès que la FC dépasse ${HIKE_HR_CEILING} bpm. Relâché en descente.`
     })
   }
 

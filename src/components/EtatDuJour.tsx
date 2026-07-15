@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { loadEtat, saveEtat, type DailyState } from '../lib/coach'
-import Icon from './Icon'
+import { IconBadge } from './ui'
 
 // Récup subjective du jour (sommeil / fatigue / FC repos), passée au coach pour le débrief.
 export default function EtatDuJour({ date }: { date: string }) {
@@ -14,9 +14,9 @@ export default function EtatDuJour({ date }: { date: string }) {
 
   return (
     <div className="glass p-4">
-      <div className="mb-3 flex items-center gap-2.5">
-        <Icon name="heart" size={18} className="text-run" />
-        <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
+      <div className="mb-4 flex items-center gap-2.5">
+        <IconBadge name="heart" size={34} tone="run" />
+        <span className="font-display text-[17px] font-semibold uppercase tracking-[0.12em] text-white/85">
           État du jour
         </span>
       </div>

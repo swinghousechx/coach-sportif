@@ -170,9 +170,11 @@ function StravaCard() {
 
   return (
     <div className="glass p-4">
-      <div className="flex items-center gap-2.5">
-        <StravaMark size={18} />
-        <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
+      <div className="mb-1 flex items-center gap-2.5">
+        <span className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-run/40">
+          <StravaMark size={16} />
+        </span>
+        <span className="font-display text-[17px] font-semibold uppercase tracking-[0.12em] text-white/85">
           Strava
         </span>
         {enabled && connected && (

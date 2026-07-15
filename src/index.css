@@ -45,12 +45,15 @@
 }
 
 @layer components {
+  /* Surface unique de l'app — identique à <Tile> (ui.tsx). Tout ce qui porte
+     .glass hérite donc du même rayon et de la même matière que les tuiles. */
   .glass {
-    @apply rounded-3xl border border-white/10 bg-white/[0.05] shadow-glass backdrop-blur-xl;
+    @apply rounded-[28px] border border-white/[0.08] bg-white/[0.055] shadow-glass backdrop-blur-xl;
   }
 
+  /* nowrap : un badge court comme « en cours » ne doit jamais se casser en deux lignes. */
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em];
+    @apply inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em];
   }
 
   /* Anneau de focus clavier cohérent, jamais supprimé sans remplacement. */

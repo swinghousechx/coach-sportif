@@ -4,6 +4,7 @@ import type { Adaptation, Day, Program, Week } from '../types'
 import { chatCoach, clearChat, loadChat, saveChat, type ChatMessage } from '../lib/coach'
 import { typeLabel } from '../lib/dayMeta'
 import Icon from './Icon'
+import { IconBadge } from './ui'
 
 interface Props {
   day: Day
@@ -78,8 +79,8 @@ export default function ChatCoach({ day, week, program, tomorrow, today, onApply
     <div className="glass flex flex-col p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <Icon name="message" size={18} className="text-gym" />
-          <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
+          <IconBadge name="message" size={34} tone="gym" />
+          <span className="font-display text-[17px] font-semibold uppercase tracking-[0.12em] text-white/85">
             Parler au coach
           </span>
         </div>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchProfil, loadProfil } from '../lib/coach'
 import { computeZones, fmtPace, medianHrRest, zone, type Profil } from '../lib/zones'
-import Icon from './Icon'
 import { BigNumber, IconBadge, Sparkline, Tile, TileLabel } from './ui'
 
 // Profil physiologique mesuré sur Strava → zones FC recalibrées.
@@ -41,8 +40,8 @@ export default function ProfilCard() {
     <div className="glass p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <Icon name="target" size={18} className="text-gym" />
-          <span className="font-display text-base font-semibold uppercase tracking-widest text-white/85">
+          <IconBadge name="target" size={34} tone="gym" />
+          <span className="font-display text-[17px] font-semibold uppercase tracking-[0.12em] text-white/85">
             Mon profil
           </span>
         </div>

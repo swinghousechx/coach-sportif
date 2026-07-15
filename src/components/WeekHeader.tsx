@@ -3,6 +3,7 @@ import { phaseTone } from '../lib/dayMeta'
 import { weekRange } from '../lib/week'
 import Icon from './Icon'
 import WeekStrip from './WeekStrip'
+import { BigNumber, TileLabel } from './ui'
 
 interface Props {
   week: Week
@@ -18,22 +19,27 @@ export default function WeekHeader({ week, totalWeeks, isDone, todayDate, onJump
 
   return (
     <header className="glass mb-4 overflow-hidden p-5">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="badge bg-white/10 text-white/90">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <TileLabel>
             Semaine {week.weekNumber}/{totalWeeks}
-          </span>
-          <span className={`badge bg-white/10 ${phaseTone(week.phase)}`}>{week.phase}</span>
+          </TileLabel>
+          <p className="mt-1.5 font-display text-[26px] font-bold leading-none tracking-tight text-white">
+            {weekRange(week)}
+          </p>
+          <span className={`badge mt-2 bg-white/10 ${phaseTone(week.phase)}`}>{week.phase}</span>
         </div>
-        <span className="font-display text-sm font-semibold tabular-nums tracking-wide text-white/70">
-          {doneCount}
-          <span className="text-white/40">/{week.days.length}</span>
-        </span>
+
+        {/* Séances cochées : la métrique de la semaine, traitée comme une donnée. */}
+        <div className="shrink-0 text-right">
+          <BigNumber value={doneCount} unit={`/${week.days.length}`} size="md" />
+          <p className="mt-1 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
+            séances
+          </p>
+        </div>
       </div>
 
-      <p className="font-display text-lg font-semibold tracking-wide text-white/85">{weekRange(week)}</p>
-
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
         {isRaceWeek ? (
           <span className="flex items-center gap-1.5">
             <Icon name="flag" size={15} className="text-run" />

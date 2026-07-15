@@ -1,14 +1,14 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { Day, Program, RunDetail, Week } from '../types'
-import { accentFor, typeLabel, typeIcon, ACCENT_TEXT, ACCENT_BG, ACCENT_RING } from '../lib/dayMeta'
+import { accentFor, typeLabel, typeIcon, ACCENT_TEXT, ACCENT_RING } from '../lib/dayMeta'
 import { isCoachEnabled } from '../lib/coach'
 import Icon from './Icon'
 import NutritionBlock from './NutritionBlock'
 import StravaLink from './StravaLink'
 import CoachDebrief from './CoachDebrief'
 import Targets from './Targets'
-import { ArrowButton, BigNumber, IconBadge, TileLabel } from './ui'
+import { ArrowButton, IconBadge } from './ui'
 
 interface Props {
   day: Day
@@ -53,7 +53,7 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         y: { duration: 0.45, ease: EASE_EXPO, delay: index * 0.04 }
       }}
       className={[
-        'glass relative p-4',
+        'glass relative p-3.5',
         isToday ? `bg-white/[0.07] ring-2 ${ACCENT_RING[accent]}` : '',
         isRace && !isToday ? 'ring-2 ring-run/50' : ''
       ].join(' ')}
@@ -70,60 +70,61 @@ const DayCard = forwardRef<HTMLElement, Props>(function DayCard(
         }`}
       />
 
-      <div className="pl-2">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <IconBadge name={typeIcon(day.type)} size={38} tone={accent === 'rest' ? 'muted' : accent} />
-            <div className="min-w-0">
-              <TileLabel>{day.label}</TileLabel>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                <span className={`badge ${ACCENT_BG[accent]} ${accentText}`}>{typeLabel(day.type)}</span>
-                {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
-                {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
-              </div>
-            </div>
-          </div>
-
-          <ArrowButton
-            onClick={() => setOpen((v) => !v)}
-            label={open ? `${title} : replier` : `${title} : déplier`}
-            expanded={open}
-            tone="light"
-            size={38}
-          />
-        </div>
+      {/* En-tête toujours compact : replié, une journée tient en deux lignes. */}
+      <div className="flex items-center gap-3 pl-2">
+        <IconBadge name={typeIcon(day.type)} size={34} tone={accent === 'rest' ? 'muted' : accent} />
 
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="focus-ring w-full text-left"
+          className="focus-ring min-w-0 flex-1 text-left"
         >
+          <p className="flex flex-wrap items-baseline gap-x-1.5 font-display text-[10.5px] font-semibold uppercase leading-none tracking-[0.12em]">
+            <span className="text-white/45">{day.label}</span>
+            <span className="text-white/20">·</span>
+            <span className={accentText}>{typeLabel(day.type)}</span>
+            {headlineKm && (
+              <>
+                <span className="text-white/20">·</span>
+                <span className={`${accentText} tabular-nums`}>{headlineKm} km</span>
+              </>
+            )}
+          </p>
+
           <h2
-            className={`text-balance font-display font-semibold leading-tight tracking-tight ${
-              isRace ? 'text-[28px]' : 'text-[22px]'
-            } ${done ? 'text-white/60 line-through decoration-white/40' : 'text-white'}`}
+            className={`mt-1.5 text-pretty font-display font-semibold leading-tight tracking-tight ${
+              isRace ? 'text-[22px]' : 'text-[17px]'
+            } ${open ? '' : 'line-clamp-2'} ${
+              done ? 'text-white/55 line-through decoration-white/35' : 'text-white'
+            }`}
           >
             {title}
           </h2>
+
+          <div className="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
+            {isToday && <span className={`badge bg-white/12 ${accentText}`}>Aujourd'hui</span>}
+            {day.adapted && <span className="badge bg-white/12 text-white/70">Adapté</span>}
+          </div>
         </button>
 
-        {isRace && day.goalTime && (
-          <p className="mt-1 font-display text-sm font-semibold uppercase tracking-widest text-run">
-            Objectif {day.goalTime.replace(':00:00', 'h')}
-          </p>
-        )}
-
-        {/* Bas de tuile : la donnée qu'on lit d'un coup d'œil, et la coche. */}
-        <div className="mt-2.5 flex items-end justify-between gap-3">
-          {headlineKm ? (
-            <BigNumber value={headlineKm} unit="km" size="md" tone={accent === 'gym' ? 'gym' : 'run'} />
-          ) : (
-            <span />
-          )}
+        <div className="flex shrink-0 items-center gap-1.5">
           <ToggleDone done={done} onToggle={onToggle} label={title} />
+          <ArrowButton
+            onClick={() => setOpen((v) => !v)}
+            label={open ? `${title} : replier` : `${title} : déplier`}
+            expanded={open}
+            tone="light"
+            size={34}
+          />
         </div>
       </div>
+
+      {isRace && day.goalTime && (
+        <p className="mt-2 pl-2 font-display text-sm font-semibold uppercase tracking-widest text-run">
+          Objectif {day.goalTime.replace(':00:00', 'h')}
+        </p>
+      )}
 
       {/* Corps repliable (grid-template-rows 0fr→1fr, comme le débrief). */}
       <div
@@ -264,10 +265,10 @@ function ToggleDone({
       aria-pressed={done}
       aria-label={done ? `${label} : marquer comme non fait` : `${label} : marquer comme fait`}
       className={[
-        'focus-ring relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200',
+        'focus-ring relative flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200',
         done
           ? 'border-emerald-400 bg-emerald-400 text-ink'
-          : 'border-white/30 bg-white/5 text-white/55 hover:border-white/50 hover:text-white/80'
+          : 'border-white/25 bg-white/5 text-white/50 hover:border-white/50 hover:text-white/80'
       ].join(' ')}
     >
       <AnimatePresence>
@@ -284,7 +285,7 @@ function ToggleDone({
         )}
       </AnimatePresence>
 
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="currentColor" strokeWidth={3}>
+      <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={3}>
         <motion.path
           d="M5 13l4 4L19 7"
           strokeLinecap="round"

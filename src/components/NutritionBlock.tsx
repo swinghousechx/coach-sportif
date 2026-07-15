@@ -1,39 +1,43 @@
 import type { Nutrition } from '../types'
 import Icon from './Icon'
+import { BigNumber, IconBadge, Tile, TileLabel } from './ui'
 
-// Bloc nutrition du jour : calories cibles, plancher protéines, note contextuelle.
+// Nutrition du jour : deux tuiles jumelles (apport / plancher protéines) + la note.
 export default function NutritionBlock({ nutrition }: { nutrition: Nutrition }) {
   const { calories, proteinG, note } = nutrition
-  const hasFigures = calories != null || proteinG != null
+  if (calories == null && proteinG == null && !note) return null
 
   return (
-    <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-      <div className="mb-1.5 flex items-center gap-2">
-        <Icon name="flame" size={15} className="text-run" />
-        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+    <div className="mt-3">
+      <div className="mb-2 flex items-center gap-2 pl-1">
+        <Icon name="flame" size={14} className="text-run" />
+        <span className="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
           Nutrition
         </span>
       </div>
 
-      {hasFigures && (
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          {calories != null && (
-            <span className="flex items-baseline gap-1.5">
-              <span className="font-display text-lg font-bold tabular-nums text-white">{calories}</span>
-              <span className="text-[11px] font-medium uppercase tracking-wide text-white/45">kcal</span>
-            </span>
-          )}
-          {proteinG != null && (
-            <span className="flex items-baseline gap-1.5">
-              <Icon name="protein" size={14} className="translate-y-[1px] text-gym" />
-              <span className="font-display text-lg font-bold tabular-nums text-white">≥{proteinG}</span>
-              <span className="text-[11px] font-medium uppercase tracking-wide text-white/45">g prot.</span>
-            </span>
-          )}
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-2">
+        {calories != null && (
+          <Tile className="p-3.5">
+            <div className="mb-3 flex items-start gap-2">
+              <IconBadge name="flame" size={28} tone="run" />
+              <TileLabel>Apport</TileLabel>
+            </div>
+            <BigNumber value={calories} unit="kcal" size="sm" />
+          </Tile>
+        )}
+        {proteinG != null && (
+          <Tile className="p-3.5">
+            <div className="mb-3 flex items-start gap-2">
+              <IconBadge name="protein" size={28} tone="gym" />
+              <TileLabel>Protéines</TileLabel>
+            </div>
+            <BigNumber value={`≥${proteinG}`} unit="g" size="sm" />
+          </Tile>
+        )}
+      </div>
 
-      {note && <p className="mt-1.5 text-pretty text-[12px] leading-snug text-white/65">{note}</p>}
+      {note && <p className="mt-2 text-pretty pl-1 text-[12px] leading-snug text-white/55">{note}</p>}
     </div>
   )
 }
