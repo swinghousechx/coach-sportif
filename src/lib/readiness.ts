@@ -1,4 +1,5 @@
 import type { Program } from '../types'
+import { effectiveHrMax } from './coach'
 import { computeZones, medianHrRest, type Profil } from './zones'
 
 // « Suis-je dans les clous pour le sub-4h ? »
@@ -24,7 +25,8 @@ export interface Axis {
 
 export function readiness(program: Program, profil: Profil | null, today: string): Axis[] {
   const hrRest = medianHrRest()
-  const zones = profil?.hrMax ? computeZones(profil.hrMax, hrRest) : null
+  const hrMax = effectiveHrMax(profil)
+  const zones = hrMax ? computeZones(hrMax, hrRest) : null
 
   const num = (v: unknown) => (typeof v === 'number' ? v : parseFloat(String(v)))
   const raceKm = program.raceInfo.distanceKm

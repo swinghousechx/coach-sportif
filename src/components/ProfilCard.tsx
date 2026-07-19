@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
-import { fetchProfil, loadProfil } from '../lib/coach'
+import {
+  effectiveHrMax,
+  fetchProfil,
+  loadHrMaxOverride,
+  loadProfil,
+  saveHrMaxOverride
+} from '../lib/coach'
 import { computeZones, fmtPace, medianHrRest, zone, type Profil } from '../lib/zones'
+import Icon from './Icon'
 import { BigNumber, IconBadge, Sparkline, Tile, TileLabel } from './ui'
 
 // Profil physiologique mesuré sur Strava → zones FC recalibrées.
@@ -31,10 +38,25 @@ export default function ProfilCard() {
     }
   }
 
+  const [editingMax, setEditingMax] = useState(false)
+  const [bump, setBump] = useState(0) // force le recalcul après un changement d'override
+
   const hrRest = medianHrRest()
-  const zones = profil?.hrMax ? computeZones(profil.hrMax, hrRest) : null
+  const override = loadHrMaxOverride()
+  const hrMax = effectiveHrMax(profil)
+  const zones = hrMax ? computeZones(hrMax, hrRest) : null
   // Easy au-dessus de la Z2 = les sorties faciles sont courues trop vite : on le signale.
   const aboveZ2 = !!(zones && profil?.easyHrMedian && profil.easyHrMedian > zone(zones, 'Z2').hi)
+  // Un max mesuré sous ~175 sur un coureur qui prépare un marathon est presque
+  // toujours le plafond de ses easy, pas son vrai maximum. On le dit franchement.
+  const maxSuspect = override == null && profil?.hrMax != null && profil.hrMax < 175
+
+  function commitMax(v: number | null) {
+    saveHrMaxOverride(v)
+    setEditingMax(false)
+    setBump((b) => b + 1)
+  }
+  void bump
 
   return (
     <div className="glass p-4">
@@ -66,7 +88,14 @@ export default function ProfilCard() {
       {profil && (
         <>
           <div className="grid grid-cols-2 gap-2">
-            <Stat icon="heart" label="FC max" value={profil.hrMax ?? '—'} unit={profil.hrMax ? 'bpm' : undefined} />
+            <HrMaxTile
+              value={hrMax}
+              manual={override != null}
+              suspect={maxSuspect}
+              editing={editingMax}
+              onEdit={() => setEditingMax(true)}
+              onCommit={commitMax}
+            />
             <Stat
               icon="moon"
               label="FC repos"
@@ -127,14 +156,113 @@ export default function ProfilCard() {
             </p>
           )}
 
+          {maxSuspect && (
+            <div className="mt-3 rounded-2xl border border-run/30 bg-run/[0.08] p-3">
+              <p className="flex items-start gap-2 text-[12.5px] leading-snug text-white/80">
+                <Icon name="alert" size={15} className="mt-0.5 shrink-0 text-run" />
+                <span>
+                  <strong className="font-semibold text-white">FC max probablement sous-estimée.</strong>{' '}
+                  {profil.hrMax} bpm, c’est sans doute le plafond de tes easy, pas ton vrai maximum —
+                  et toutes tes zones en découlent. Touche la tuile <strong>FC max</strong> pour saisir
+                  ta vraie valeur (un test en côte à fond, ou ton max connu en course).
+                </span>
+              </p>
+            </div>
+          )}
+
           <p className="mt-3 text-pretty text-[12.5px] leading-snug text-white/60">
             Mesuré sur {profil.runs} sorties depuis le {frDate(profil.since)}
             {profil.runsAvecFc ? `, dont ${profil.runsAvecFc} avec cardio` : ''}.
+            {override != null && ' FC max réglée à la main — les zones sont calculées dessus.'}
             {!hrRest && ' Saisis ta FC repos ci-dessus : les zones passeront en réserve cardiaque, plus précises.'}
           </p>
         </>
       )}
     </div>
+  )
+}
+
+// Tuile FC max éditable : l'app ne mesure que ce qu'elle voit, la saisie reprend la main.
+function HrMaxTile({
+  value,
+  manual,
+  suspect,
+  editing,
+  onEdit,
+  onCommit
+}: {
+  value: number | null
+  manual: boolean
+  suspect: boolean
+  editing: boolean
+  onEdit: () => void
+  onCommit: (v: number | null) => void
+}) {
+  const [draft, setDraft] = useState(String(value ?? ''))
+
+  if (editing) {
+    return (
+      <Tile className="flex flex-col justify-between gap-3 p-3.5">
+        <div className="flex items-start gap-2">
+          <IconBadge name="heart" size={30} tone="gym" />
+          <TileLabel>FC max</TileLabel>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <input
+            type="number"
+            inputMode="numeric"
+            autoFocus
+            min={120}
+            max={230}
+            defaultValue={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onCommit(Number(draft) || null)
+            }}
+            className="focus-ring w-16 rounded-xl border border-white/15 bg-white/5 px-2 py-1 text-center font-display text-[22px] font-bold tabular-nums text-white"
+          />
+          <button
+            type="button"
+            onClick={() => onCommit(Number(draft) || null)}
+            aria-label="Valider la FC max"
+            className="focus-ring rounded-full bg-gym p-1.5 text-ink transition active:scale-90"
+          >
+            <Icon name="check" size={15} strokeWidth={3} />
+          </button>
+          {manual && (
+            <button
+              type="button"
+              onClick={() => onCommit(null)}
+              className="focus-ring text-[10px] font-semibold uppercase tracking-wide text-white/50 transition-colors hover:text-white/80"
+            >
+              Auto
+            </button>
+          )}
+        </div>
+      </Tile>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      className="focus-ring rounded-[28px] text-left"
+      aria-label="Régler la FC max à la main"
+    >
+      <Tile className={`flex h-full flex-col justify-between gap-3 p-3.5 ${suspect ? 'ring-1 ring-run/40' : ''}`}>
+        <div className="flex items-start gap-2">
+          <IconBadge name="heart" size={30} tone={suspect ? 'run' : 'muted'} alert={suspect} />
+          <TileLabel>FC max</TileLabel>
+        </div>
+        <div className="flex items-end justify-between gap-1">
+          <BigNumber value={value ?? '—'} unit={value ? 'bpm' : undefined} size="sm" tone={suspect ? 'run' : 'white'} />
+          <span className="pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/40">
+            {manual ? 'manuel' : 'régler'}
+          </span>
+        </div>
+      </Tile>
+    </button>
   )
 }
 

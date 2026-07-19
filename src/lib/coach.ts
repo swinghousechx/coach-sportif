@@ -78,7 +78,11 @@ export function planFingerprint(day: Day): string {
     dp: day.elevationM ?? null,
     ex: day.exercises?.map((e) => [e.name, e.sets, e.reps]) ?? null,
     r: day.run ? [day.run.description ?? null, day.run.distanceKm ?? null] : null,
-    a: day.adapted?.appliedAt ?? null
+    a: day.adapted?.appliedAt ?? null,
+    // La FC max entre dans l'empreinte : le débrief juge le temps en zone sur les
+    // zones qui en découlent. Changer la FC max doit régénérer le débrief, pas
+    // ressortir l'ancien calé sur des zones fausses.
+    hrmax: effectiveHrMax(loadProfil())
   })
   let h = 5381 // djb2
   for (let i = 0; i < src.length; i++) h = ((h << 5) + h + src.charCodeAt(i)) | 0
@@ -221,6 +225,34 @@ export function saveProfil(p: Profil): void {
   }
 }
 
+// FC max saisie à la main. L'app ne mesure que ce qu'elle voit : si l'athlète ne
+// s'est jamais mis dans le rouge, la « FC max observée » est en fait le plafond de
+// ses easy — trop basse, et TOUTES les zones en découlent. L'override reprend la main.
+const HRMAX_KEY = 'coach:hrmax'
+
+export function loadHrMaxOverride(): number | null {
+  try {
+    const v = Number(localStorage.getItem(HRMAX_KEY))
+    return v > 120 && v < 230 ? v : null
+  } catch {
+    return null
+  }
+}
+
+export function saveHrMaxOverride(v: number | null): void {
+  try {
+    if (v == null) localStorage.removeItem(HRMAX_KEY)
+    else localStorage.setItem(HRMAX_KEY, String(v))
+  } catch {
+    /* ignore */
+  }
+}
+
+/** FC max à utiliser pour les zones : la saisie manuelle prime sur la mesure. */
+export function effectiveHrMax(p: Profil | null): number | null {
+  return loadHrMaxOverride() ?? p?.hrMax ?? null
+}
+
 /**
  * Profil + zones tels qu'affichés dans l'app, pour que le coach raisonne sur les
  * mêmes chiffres que l'athlète (et ne réinvente pas ses zones à chaque réponse).
@@ -229,10 +261,12 @@ export function profilContext() {
   const p = loadProfil()
   if (!p) return undefined
   const hrRest = medianHrRest()
-  const zones = p.hrMax ? computeZones(p.hrMax, hrRest) : null
+  const hrMax = effectiveHrMax(p)
+  const zones = hrMax ? computeZones(hrMax, hrRest) : null
   return {
     mesureSur: `${p.runs} sorties depuis le ${p.since}`,
-    hrMax: p.hrMax,
+    hrMax,
+    hrMaxSource: loadHrMaxOverride() != null ? 'saisie manuelle' : 'observée sur Strava',
     hrRest,
     easyPace: p.easyPaceSec ? `${fmtPace(p.easyPaceSec)}/km` : undefined,
     easyHrMedian: p.easyHrMedian,

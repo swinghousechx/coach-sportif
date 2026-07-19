@@ -1,16 +1,17 @@
 import type { Day, Program } from '../types'
-import { loadProfil } from '../lib/coach'
+import { effectiveHrMax, loadProfil } from '../lib/coach'
 import { computeZones, medianHrRest, targetsFor } from '../lib/zones'
 import Icon from './Icon'
 import { IconBadge, Tile, TileLabel } from './ui'
 
 // Cibles chiffrées de la sortie : allure, FC, dénivelé, effort.
-// Dérivées du plan + du profil réel (FC max observée sur Strava, FC repos saisie).
+// Dérivées du plan + du profil réel (FC max, FC repos saisie).
 // Sans profil mesuré, le bloc ne s'affiche pas : pas de chiffres inventés.
 export default function Targets({ day, program }: { day: Day; program: Program }) {
   const profil = loadProfil()
   const hrRest = medianHrRest()
-  const zones = profil?.hrMax ? computeZones(profil.hrMax, hrRest) : null
+  const hrMax = effectiveHrMax(profil)
+  const zones = hrMax ? computeZones(hrMax, hrRest) : null
   const targets = targetsFor(day, program, profil, zones)
 
   if (!targets.length) return null
